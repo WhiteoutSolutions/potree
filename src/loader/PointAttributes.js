@@ -35,6 +35,7 @@ class PointAttribute{
 		this.byteSize = this.numElements * this.type.size;
 		this.description = "";
 		this.range = [Infinity, -Infinity];
+		this.distinctValues = [];
 	}
 
 };

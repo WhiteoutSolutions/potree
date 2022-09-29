@@ -433,14 +433,25 @@ vec3 getGpsTime(){
 
 vec3 getElevation(){
 	vec4 world = modelMatrix * vec4( position, 1.0 );
-	float w = (world.z - elevationRange.x) / (elevationRange.y - elevationRange.x);
-	vec3 cElevation = texture2D(gradient, vec2(w,1.0-w)).rgb;
+	vec3 cElevation = vec3(0.5,0.5,0.5); // TODO: Here is an hardcoded color for outside range points
+	if(world.z >= elevationRange.x && world.z <= elevationRange.y) {
+		float w = (world.z - elevationRange.x) / (elevationRange.y - elevationRange.x);
+		cElevation = texture2D(gradient, vec2(w,1.0-w)).rgb;
+	}
 	
 	return cElevation;
 }
 
 vec4 getClassification(){
 	vec2 uv = vec2(classification / 255.0, 0.5);
+	vec4 classColor = texture2D(classificationLUT, uv);
+	
+	return classColor;
+}
+
+vec4 getExtraClassification(){
+	float w = (aExtra + uExtraOffset) * uExtraScale;
+	vec2 uv = vec2(w*52.0/255.0, 0.5);
 	vec4 classColor = texture2D(classificationLUT, uv);
 	
 	return classColor;
@@ -605,7 +616,7 @@ vec3 getColor(){
 	
 	#ifdef color_type_rgba
 		color = getRGB();
-	#elif defined color_type_height || defined color_type_elevation
+	#elif defined color_type_height || defined color_type_elevation || defined color_type_elevation_z
 		color = getElevation();
 	#elif defined color_type_rgb_height
 		vec3 cHeight = getElevation();
@@ -652,6 +663,9 @@ vec3 getColor(){
 		color = getCompositeColor();
 	#elif defined color_type_matcap
 		color = getMatcap();
+	#elif defined color_type_extra_classification
+		vec4 cl = getExtraClassification();
+		color = cl.rgb;
 	#else 
 		color = getExtra();
 	#endif
@@ -747,7 +761,11 @@ bool pointInClipPolygon(vec3 point, int polyIdx) {
 void doClipping(){
 
 	{
-		vec4 cl = getClassification(); 
+		#ifdef color_type_extra_classification
+			vec4 cl = getExtraClassification(); 
+		#else
+			vec4 cl = getClassification(); 
+		#endif
 		if(cl.a == 0.0){
 			gl_Position = vec4(100.0, 100.0, 100.0, 0.0);
 			

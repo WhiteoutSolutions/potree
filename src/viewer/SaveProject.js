@@ -240,7 +240,7 @@ function createViewData(viewer){
 }
 
 function createClassificationData(viewer){
-	const classifications = viewer.classifications;
+	const classifications = viewer.classifications.DEFAULT;
 
 	const data = classifications;
 

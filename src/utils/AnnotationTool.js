@@ -23,8 +23,12 @@ export class AnnotationTool extends EventDispatcher{
 		let annotation = new Annotation({
 			position: [589748.270, 231444.540, 753.675],
 			title: "Annotation Title",
-			description: `Annotation Description`
+			description: `Annotation Description`,
+			onRemove: ()=>{
+				annotations.remove(annotation);
+			}
 		});
+		annotation.doneCallback = args.callback;
 		this.dispatchEvent({type: 'start_inserting_annotation', annotation: annotation});
 
 		const annotations = this.viewer.scene.annotations;
@@ -42,6 +46,10 @@ export class AnnotationTool extends EventDispatcher{
 				callbacks.cancel();
 			}
 		};
+
+		if(annotation.doneCallback) {
+			annotation.doneCallback();
+		}
 
 		callbacks.cancel = e => {
 			annotations.remove(annotation);
@@ -71,7 +79,7 @@ export class AnnotationTool extends EventDispatcher{
 		};
 
 		let drop = (e) => {
-			viewer.scene.scene.remove(this.s);
+			this.viewer.scene.scene.remove(this.s);
 			this.s.removeEventListener("drag", drag);
 			this.s.removeEventListener("drop", drop);
 		};

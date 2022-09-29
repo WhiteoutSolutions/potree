@@ -33,6 +33,16 @@ export class TextSprite extends THREE.Object3D{
 		this.backgroundColor = { r: 255, g: 255, b: 255, a: 1.0 };
 		this.textColor = {r: 255, g: 255, b: 255, a: 1.0};
 		this.text = '';
+		this.removable = false;
+		this.iconClose = exports.resourcePath + '/icons/close.svg';
+		this.iconImage = new Image();
+		this.iconImage.src = this.iconClose;
+		const thisObj = this;
+		this.iconImage.onload = function() {
+			console.log("Image loaded " + thisObj.iconClose);
+			console.log("Image " + thisObj.iconImage.src);
+			thisObj.update();
+		};
 
 		this.setText(text);
 	}
@@ -63,6 +73,11 @@ export class TextSprite extends THREE.Object3D{
 		this.update();
 	}
 
+	setRemovable(removable){
+		this.removable = removable;
+		this.update();
+	}
+
 	update(){
 		let canvas = document.createElement('canvas');
 		let context = canvas.getContext('2d');
@@ -75,9 +90,25 @@ export class TextSprite extends THREE.Object3D{
 		let spriteWidth = 2 * margin + textWidth + 2 * this.borderThickness;
 		let spriteHeight = this.fontsize * 1.4 + 2 * this.borderThickness;
 
+		let removeMetrics = context.measureText("x");
+		let removeWidth = 2*removeMetrics.width;
+		let removeLeftMargin = 10;
+		if(this.removable) {
+			spriteWidth = spriteWidth + removeWidth + removeLeftMargin;
+		}
+
 		context.canvas.width = spriteWidth;
 		context.canvas.height = spriteHeight;
 		context.font = 'Bold ' + this.fontsize + 'px ' + this.fontface;
+
+		if(this.removable && this.iconImage.complete) {
+			context.fillStyle = "#fff";
+			context.fillRect(0, 0, canvas.width, canvas.height);
+			context.globalCompositeOperation = "destination-in";
+			context.drawImage(this.iconImage, this.borderThickness + margin + textWidth + removeLeftMargin, spriteHeight/2 - removeWidth/2, removeWidth, removeWidth)
+			context.globalCompositeOperation = "source-over";
+		}
+		context.globalCompositeOperation = "destination-over";
 
 		// background color
 		context.fillStyle = 'rgba(' + this.backgroundColor.r + ',' + this.backgroundColor.g + ',' +
@@ -88,8 +119,9 @@ export class TextSprite extends THREE.Object3D{
 
 		context.lineWidth = this.borderThickness;
 		this.roundRect(context, this.borderThickness / 2, this.borderThickness / 2,
-			textWidth + this.borderThickness + 2 * margin, this.fontsize * 1.4 + this.borderThickness, 6);
+			textWidth + this.borderThickness + 2 * margin + (this.removable?removeWidth + removeLeftMargin:0), this.fontsize * 1.4 + this.borderThickness, 6);
 
+		context.globalCompositeOperation = "source-over";
 		// text color
 		context.strokeStyle = 'rgba(0, 0, 0, 1.0)';
 		context.strokeText(this.text, this.borderThickness + margin, this.fontsize + this.borderThickness);
@@ -139,6 +171,20 @@ export class TextSprite extends THREE.Object3D{
 		ctx.closePath();
 		ctx.fill();
 		ctx.stroke();
+	}
+
+	raycast (raycaster, intersects) {
+        this.sprite.raycast(raycaster, intersects);
+		// recalculate distances because they are not necessarely correct
+		// for scaled objects.
+		// see https://github.com/mrdoob/three.js/issues/5827
+		// TODO: remove this once the bug has been fixed
+		for (let i = 0; i < intersects.length; i++) {
+			let I = intersects[i];
+			I.distance = raycaster.ray.origin.distanceTo(I.point);
+            console.log("Distance: " + I.distance);
+		}
+		intersects.sort(function (a, b) { return a.distance - b.distance; });
 	}
 
 }

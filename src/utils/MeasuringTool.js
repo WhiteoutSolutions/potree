@@ -195,6 +195,7 @@ export class MeasuringTool extends EventDispatcher{
 		measure.showEdges = pick(args.showEdges, true);
 		measure.closed = pick(args.closed, false);
 		measure.maxMarkers = pick(args.maxMarkers, Infinity);
+		measure.doneCallback = pick(args.callback, null);
 
 		measure.name = args.name || 'Measurement';
 
@@ -224,13 +225,17 @@ export class MeasuringTool extends EventDispatcher{
 			if (cancel.removeLastMarker) {
 				measure.removeMarker(measure.points.length - 1);
 			}
-			domElement.removeEventListener('mouseup', insertionCallback, false);
+			
+			domElement.removeEventListener('mouseup', insertionCallback, true);
 			this.viewer.removeEventListener('cancel_insertions', cancel.callback);
+			if(measure.doneCallback){
+				measure.doneCallback();
+			}
 		};
 
 		if (measure.maxMarkers > 1) {
 			this.viewer.addEventListener('cancel_insertions', cancel.callback);
-			domElement.addEventListener('mouseup', insertionCallback, false);
+			domElement.addEventListener('mouseup', insertionCallback, true);
 		}
 
 		measure.addMarker(new THREE.Vector3(0, 0, 0));

@@ -674,6 +674,7 @@ export class InputHandler extends EventDispatcher {
 		let raycaster = new THREE.Raycaster();
 		raycaster.ray.set(ray.origin, ray.direction);
 		raycaster.params.Line.threshold = 0.2;
+		raycaster.camera = camera;
 
 		let intersections = raycaster.intersectObjects(interactables.filter(o => o.visible), false);
 

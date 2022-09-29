@@ -152,7 +152,7 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 			backfaceCulling: { type: "b", value: false },
 		};
 
-		this.classification = ClassificationScheme.DEFAULT;
+		this.classification = ClassificationScheme;
 
 		this.defaultAttributeValues.normal = [0, 0, 0];
 		this.defaultAttributeValues.classification = [0, 0, 0];
@@ -254,6 +254,13 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 
 		if(this.activeAttributeName){
 			let attributeName = this.activeAttributeName.replace(/[^a-zA-Z0-9]/g, '_');
+
+			if(this.activeAttributeName.match(/classification/i) && this.activeAttributeName !== "classification") {
+				defines.push(`#define color_type_extra_classification`);
+			}
+			else {
+				defines.push(`#define color_type_${attributeName}`);
+			}
 
 			defines.push(`#define color_type_${attributeName}`);
 		}
@@ -362,7 +369,10 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 	}
 
 	recomputeClassification () {
-		const classification = this.classification;
+		let classification = this.classification.DEFAULT;
+		if(this.activeAttributeName !== "classification" && this.classification[this.activeAttributeName]) {
+			classification = this.classification[this.activeAttributeName];
+		}
 		const data = this.classificationTexture.image.data;
 
 		let width = 256;

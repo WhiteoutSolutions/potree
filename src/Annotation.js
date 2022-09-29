@@ -49,22 +49,36 @@ export class Annotation extends EventDispatcher {
 		this.domElement = $(`
 			<div class="annotation" oncontextmenu="return false;">
 				<div class="annotation-titlebar">
+					<span class="annotation-close" style="margin-left: 8px">
+						<img src="${iconClose}" width="16px">
+					</span>
 					<span class="annotation-label"></span>
+					<input class="annotation-title-input"/>
 				</div>
 				<div class="annotation-description">
 					<span class="annotation-description-close">
 						<img src="${iconClose}" width="16px">
 					</span>
 					<span class="annotation-description-content">${this._description}</span>
+					<textarea  class="annotation-description-input"/>
 				</div>
 			</div>
 		`);
 
 		this.elTitlebar = this.domElement.find('.annotation-titlebar');
+		this.elClose = this.elTitlebar.find('.annotation-close');
 		this.elTitle = this.elTitlebar.find('.annotation-label');
 		this.elTitle.append(this._title);
+		this.elTitleInput = this.elTitlebar.find('.annotation-title-input');
 		this.elDescription = this.domElement.find('.annotation-description');
+		this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
+		this.elDescriptionInput = this.domElement.find('.annotation-description-input');
 		this.elDescriptionClose = this.elDescription.find('.annotation-description-close');
+		this.elClose.hover(
+			(e) => this.elClose.css('opacity', '1'),
+			(e) => this.elClose.css('opacity', '0.5')
+		);
+		this.elClose.click((e) => args.onRemove?args.onRemove(this):null);
 		// this.elDescriptionContent = this.elDescription.find(".annotation-description-content");
 
 		this.clickTitle = () => {
@@ -74,7 +88,18 @@ export class Annotation extends EventDispatcher {
 			this.dispatchEvent({type: 'click', target: this});
 		};
 
+		this.elTitleInput.val(this._title);
+		this.elTitle.css('display', 'none');
+		this.elTitleInput.css('display', 'inline-block');
+		this.elTitleInput.focus();
+
 		this.elTitle.click(this.clickTitle);
+
+		this.elTitleInput.blur(()=>{
+			this.title = this.elTitleInput.val();
+			this.elTitle.css('display', 'inline-block');
+			this.elTitleInput.css('display', 'none');
+		});
 
 		this.actions = this.actions.map(a => {
 			if (a instanceof Action) {
@@ -96,6 +121,20 @@ export class Annotation extends EventDispatcher {
 			this.elTitlebar.append(elButton);
 			elButton.click(() => action.onclick({annotation: this}));
 		}
+
+		this.clickDescription = () => {
+			this.elDescriptionInput.val(this._description);
+			this.elDescriptionContent.css('display', 'none');
+			this.elDescriptionInput.css('display', 'inline-block');
+			this.elDescriptionInput.focus();
+			this.dispatchEvent({type: 'click', target: this});
+		};
+		this.elDescriptionContent.click(this.clickDescription);
+		this.elDescriptionInput.blur(()=>{
+			this.description = this.elDescriptionInput.val();
+			this.elDescriptionContent.css('display', 'inline-block');
+			this.elDescriptionInput.css('display', 'none');
+		});
 
 		this.elDescriptionClose.hover(
 			e => this.elDescriptionClose.css('opacity', '1'),
@@ -503,6 +542,9 @@ export class Annotation extends EventDispatcher {
 	}
 
 	hasView () {
+		if(!this.cameraTarget) {
+			return false;
+		}
 		let hasPosTargetView = this.cameraTarget.x != null;
 		hasPosTargetView = hasPosTargetView && this.cameraPosition.x != null;
 

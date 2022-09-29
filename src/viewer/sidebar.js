@@ -870,7 +870,7 @@ export class Sidebar{
 		{ // REMOVE CLIPPING TOOLS
 			clippingToolBar.append(this.createToolIcon(
 				Potree.resourcePath + "/icons/remove.svg",
-				"[title]tt.remove_all_clipping_volumes",
+				"[title]tt.remove_all_measurement", // "[title]tt.remove_all_clipping_volumes",
 				() => {
 
 					this.viewer.scene.removeAllClipVolumes();
@@ -1087,7 +1087,7 @@ export class Sidebar{
 		let elClassificationList = $('#classificationList');
 
 		let addClassificationItem = (code, name) => {
-			const classification = this.viewer.classifications[code];
+			const classification = this.viewer.classifications.DEFAULT[code];
 			const inputID = 'chkClassification_' + code;
 			const colorPickerID = 'colorPickerClassification_' + code;
 
@@ -1165,7 +1165,7 @@ export class Sidebar{
 			let elInput = element.find('input');
 
 			elInput.click( () => {
-				const classifications = this.viewer.classifications;
+				const classifications = this.viewer.classifications.DEFAULT;
 	
 				for(let key of Object.keys(classifications)){
 					let value = classifications[key];
@@ -1178,8 +1178,8 @@ export class Sidebar{
 
 		const populate = () => {
 			addToggleAllButton();
-			for (let classID in this.viewer.classifications) {
-				addClassificationItem(classID, this.viewer.classifications[classID].name);
+			for (let classID in this.viewer.classifications.DEFAULT) {
+				addClassificationItem(classID, this.viewer.classifications.DEFAULT[classID].name);
 			}
 			addInvertButton();
 		};
@@ -1194,8 +1194,8 @@ export class Sidebar{
 		this.viewer.addEventListener("classification_visibility_changed", () => {
 
 			{ // set checked state of classification buttons
-				for(const classID of Object.keys(this.viewer.classifications)){
-					const classValue = this.viewer.classifications[classID];
+				for(const classID of Object.keys(this.viewer.classifications.DEFAULT)){
+					const classValue = this.viewer.classifications.DEFAULT[classID];
 
 					let elItem = elClassificationList.find(`#chkClassification_${classID}`);
 					elItem.prop("checked", classValue.visible);
@@ -1205,8 +1205,8 @@ export class Sidebar{
 			{ // set checked state of toggle button based on state of all other buttons
 				let numVisible = 0;
 				let numItems = 0;
-				for(const key of Object.keys(this.viewer.classifications)){
-					if(this.viewer.classifications[key].visible){
+				for(const key of Object.keys(this.viewer.classifications.DEFAULT)){
+					if(this.viewer.classifications.DEFAULT[key].visible){
 						numVisible++;
 					}
 					numItems++;

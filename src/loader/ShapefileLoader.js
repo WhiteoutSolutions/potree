@@ -96,6 +96,38 @@ export class ShapefileLoader{
 			line.position.copy(min);
 			
 			return line;
+		}else if(geometry.type === "LineStringZ"){
+				let coordinates = [];
+				
+				let min = new Vector3(Infinity, Infinity, Infinity);
+				for(let i = 0; i < geometry.coordinates.length; i++){
+					let [long, lat, height] = geometry.coordinates[i];
+					let pos = transform.forward([long, lat, height]);
+					
+					min.x = Math.min(min.x, pos[0]);
+					min.y = Math.min(min.y, pos[1]);
+					min.z = Math.min(min.z, pos[2]);
+					
+					coordinates.push(...pos);
+					if(i > 0 && i < geometry.coordinates.length - 1){
+						coordinates.push(...pos);
+					}
+				}
+				
+				for(let i = 0; i < coordinates.length; i += 3){
+					coordinates[i+0] -= min.x;
+					coordinates[i+1] -= min.y;
+					coordinates[i+2] -= min.z;
+				}
+				
+				const lineGeometry = new LineGeometry();
+				lineGeometry.setPositions( coordinates );
+				const line = new Line2( lineGeometry, matLine );
+				line.computeLineDistances();
+				line.scale.set( 1, 1, 1 );
+				line.position.copy(min);
+				
+				return line;
 		}else if(geometry.type === "Polygon"){
 			for(let pc of geometry.coordinates){
 				let coordinates = [];
@@ -103,15 +135,15 @@ export class ShapefileLoader{
 				let min = new THREE.Vector3(Infinity, Infinity, Infinity);
 				for(let i = 0; i < pc.length; i++){
 					let [long, lat] = pc[i];
-					let pos = transform.forward([long, lat]);
+					let pos = pc[i].length > 2?transform.forward([long, lat, pc[i][2]]):transform.forward([long, lat,20]);
 					
 					min.x = Math.min(min.x, pos[0]);
 					min.y = Math.min(min.y, pos[1]);
-					min.z = Math.min(min.z, 20);
+					min.z = Math.min(min.z, pos[2]);
 					
-					coordinates.push(...pos, 20);
+					coordinates.push(...pos);
 					if(i > 0 && i < pc.length - 1){
-						coordinates.push(...pos, 20);
+						coordinates.push(...pos);
 					}
 				}
 				
@@ -131,6 +163,42 @@ export class ShapefileLoader{
 				
 				return line;
 			}
+		}else if(geometry.type === "MultiPolygon"){
+			let coordinates = [];
+			let min = new Vector3(Infinity, Infinity, Infinity);
+			for(let pcExternal of geometry.coordinates){
+				for(let pc of pcExternal){
+					console.log("Parsing pc " + JSON.stringify(pc));
+
+					for(let i = 0; i < pc.length; i++){
+						let [long, lat] = pc[i];
+						let pos = pc[i].length > 2?transform.forward([long, lat, pc[i][2]]):transform.forward([long, lat,20]);
+					
+						min.x = Math.min(min.x, pos[0]);
+						min.y = Math.min(min.y, pos[1]);
+						min.z = Math.min(min.z, pos[2]);
+					
+						coordinates.push(...pos);
+						if(i > 0 && i < pc.length - 1){
+							coordinates.push(...pos);
+						}
+					}
+				}
+			}
+
+			for(let i = 0; i < coordinates.length; i += 3){
+				coordinates[i+0] -= min.x;
+				coordinates[i+1] -= min.y;
+				coordinates[i+2] -= min.z;
+			}
+			const lineGeometry = new LineGeometry();
+			lineGeometry.setPositions( coordinates );
+			const line = new Line2( lineGeometry, matLine );
+			line.computeLineDistances();
+			line.scale.set( 1, 1, 1 );
+			line.position.copy(min);
+
+			return line;
 		}else{
 			console.log("unhandled feature: ", feature);
 		}

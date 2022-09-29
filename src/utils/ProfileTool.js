@@ -90,12 +90,12 @@ export class ProfileTool extends EventDispatcher {
 
 		cancel.callback = e => {
 			profile.removeMarker(profile.points.length - 1);
-			domElement.removeEventListener('mouseup', insertionCallback, false);
+			domElement.removeEventListener('mouseup', insertionCallback, true);
 			this.viewer.removeEventListener('cancel_insertions', cancel.callback);
 		};
 
 		this.viewer.addEventListener('cancel_insertions', cancel.callback);
-		domElement.addEventListener('mouseup', insertionCallback, false);
+		domElement.addEventListener('mouseup', insertionCallback, true);
 
 		profile.addMarker(new THREE.Vector3(0, 0, 0));
 		this.viewer.inputHandler.startDragging(

@@ -41,6 +41,7 @@ function createHeightLabel(){
 	heightLabel.material.depthTest = false;
 	heightLabel.material.opacity = 1;
 	heightLabel.visible = false;
+	heightLabel.removable = true;
 
 	return heightLabel;
 }
@@ -55,6 +56,7 @@ function createAreaLabel(){
 	areaLabel.material.depthTest = false;
 	areaLabel.material.opacity = 1;
 	areaLabel.visible = false;
+	areaLabel.removable = true;
 	
 	return areaLabel;
 }
@@ -292,6 +294,7 @@ export class Measure extends THREE.Object3D {
 		this._showCoordinates = false;
 		this._showArea = false;
 		this._closed = true;
+		this._dragging = false;
 		this._showAngles = false;
 		this._showCircle = false;
 		this._showHeight = false;
@@ -311,7 +314,21 @@ export class Measure extends THREE.Object3D {
 
 		this.heightEdge = createHeightLine();
 		this.heightLabel = createHeightLabel();
+		this.heightLabel.sprite.addEventListener('mouseover', (e)=>{this.heightLabel.setBackgroundColor({ r: 255, g: 106, b: 111, a: 0.85 });});
+		this.heightLabel.sprite.addEventListener('mouseleave', (e)=>{this.heightLabel.setBackgroundColor({ r: 0, g: 0, b: 0, a: 0.85 });});
+		this.heightLabel.sprite.addEventListener('mouseup', (e)=>{
+			if(!this.dragging) {
+				e.viewer.scene.removeMeasurement(this);
+			}
+		});
 		this.areaLabel = createAreaLabel();
+		this.areaLabel.sprite.addEventListener('mouseover', (e)=>{this.areaLabel.setBackgroundColor({ r: 255, g: 106, b: 111, a: 0.85 });});
+		this.areaLabel.sprite.addEventListener('mouseleave', (e)=>{this.areaLabel.setBackgroundColor({ r: 0, g: 0, b: 0, a: 0.85 });});
+		this.areaLabel.sprite.addEventListener('mouseup', (e)=>{
+			if(!this.dragging) {
+				e.viewer.scene.removeMeasurement(this);
+			}
+		});
 		this.circleRadiusLabel = createCircleRadiusLabel();
 		this.circleRadiusLine = createCircleRadiusLine();
 		this.circleLine = createCircleLine();
@@ -356,6 +373,12 @@ export class Measure extends THREE.Object3D {
 		this.add(sphere);
 		this.spheres.push(sphere);
 
+		let labelMouseUp = e => {
+			if(!this.dragging) {
+				e.viewer.scene.removeMeasurement(this);
+			}
+		}
+
 		{ // edges
 			let lineGeometry = new LineGeometry();
 			lineGeometry.setPositions( [
@@ -381,10 +404,14 @@ export class Measure extends THREE.Object3D {
 		{ // edge labels
 			let edgeLabel = new TextSprite();
 			edgeLabel.setBorderColor({r: 0, g: 0, b: 0, a: 1.0});
+			edgeLabel.setRemovable(true);
 			edgeLabel.setBackgroundColor({r: 0, g: 0, b: 0, a: 1.0});
 			edgeLabel.material.depthTest = false;
 			edgeLabel.visible = false;
 			edgeLabel.fontsize = 16;
+			edgeLabel.sprite.addEventListener('mouseover', (e)=>{edgeLabel.setBackgroundColor({ r: 255, g: 106, b: 111, a: 0.85 });});
+			edgeLabel.sprite.addEventListener('mouseleave', (e)=>{edgeLabel.setBackgroundColor({ r: 0, g: 0, b: 0, a: 0.85 });});
+			edgeLabel.sprite.addEventListener('mouseup', labelMouseUp);
 			this.edgeLabels.push(edgeLabel);
 			this.add(edgeLabel);
 		}
@@ -392,11 +419,15 @@ export class Measure extends THREE.Object3D {
 		{ // angle labels
 			let angleLabel = new TextSprite();
 			angleLabel.setBorderColor({r: 0, g: 0, b: 0, a: 1.0});
+			angleLabel.setRemovable(true);
 			angleLabel.setBackgroundColor({r: 0, g: 0, b: 0, a: 1.0});
 			angleLabel.fontsize = 16;
 			angleLabel.material.depthTest = false;
 			angleLabel.material.opacity = 1;
 			angleLabel.visible = false;
+			angleLabel.sprite.addEventListener('mouseover', (e)=>{angleLabel.setBackgroundColor({ r: 255, g: 106, b: 111, a: 0.85 });});
+			angleLabel.sprite.addEventListener('mouseleave', (e)=>{angleLabel.setBackgroundColor({ r: 0, g: 0, b: 0, a: 0.85 });});
+			angleLabel.sprite.addEventListener('mouseup', labelMouseUp);
 			this.angleLabels.push(angleLabel);
 			this.add(angleLabel);
 		}
@@ -404,17 +435,22 @@ export class Measure extends THREE.Object3D {
 		{ // coordinate labels
 			let coordinateLabel = new TextSprite();
 			coordinateLabel.setBorderColor({r: 0, g: 0, b: 0, a: 1.0});
+			coordinateLabel.setRemovable(true);
 			coordinateLabel.setBackgroundColor({r: 0, g: 0, b: 0, a: 1.0});
 			coordinateLabel.fontsize = 16;
 			coordinateLabel.material.depthTest = false;
 			coordinateLabel.material.opacity = 1;
 			coordinateLabel.visible = false;
+			coordinateLabel.sprite.addEventListener('mouseover', (e)=>{coordinateLabel.setBackgroundColor({ r: 255, g: 106, b: 111, a: 0.85 });});
+			coordinateLabel.sprite.addEventListener('mouseleave', (e)=>{coordinateLabel.setBackgroundColor({ r: 0, g: 0, b: 0, a: 0.85 });});
+			coordinateLabel.sprite.addEventListener('mouseup', labelMouseUp);
 			this.coordinateLabels.push(coordinateLabel);
 			this.add(coordinateLabel);
 		}
 
 		{ // Event Listeners
 			let drag = (e) => {
+				this.dragging = true;
 				let I = Utils.getMousePointCloudIntersection(
 					e.drag.end, 
 					e.viewer.scene.getActiveCamera(), 
@@ -444,6 +480,7 @@ export class Measure extends THREE.Object3D {
 			};
 
 			let drop = e => {
+				this.dragging = false;
 				let i = this.spheres.indexOf(e.drag.object);
 				if (i !== -1) {
 					this.dispatchEvent({
@@ -839,6 +876,10 @@ export class Measure extends THREE.Object3D {
 			let sphere = this.spheres[i];
 
 			sphere.raycast(raycaster, intersects);
+			for (let i = 0; i < this.edgeLabels.length; i++) {
+				let edgeLabel = this.edgeLabels[i];
+				edgeLabel.raycast(raycaster, intersects);
+			}
 		}
 
 		// recalculate distances because they are not necessarely correct
@@ -921,6 +962,15 @@ export class Measure extends THREE.Object3D {
 
 	set closed (value) {
 		this._closed = value;
+		this.update();
+	}
+
+	get dragging () {
+		return this._dragging;
+	}
+		
+	set dragging (value) {
+		this._dragging = value;
 		this.update();
 	}
 

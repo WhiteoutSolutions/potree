@@ -138,7 +138,7 @@ export class Viewer extends EventDispatcher{
 		this.useEDL = false;
 		this.description = "";
 
-		this.classifications = ClassificationScheme.DEFAULT;
+		this.classifications = ClassificationScheme;
 
 		this.moveSpeed = 10;
 
@@ -680,13 +680,24 @@ export class Viewer extends EventDispatcher{
 		this.dispatchEvent({'type': 'classifications_changed', 'viewer': this});
 	}
 
-	setClassificationVisibility (key, value) {
-		if (!this.classifications[key]) {
-			this.classifications[key] = {visible: value, name: 'no name'};
-			this.dispatchEvent({'type': 'classification_visibility_changed', 'viewer': this});
-		} else if (this.classifications[key].visible !== value) {
-			this.classifications[key].visible = value;
-			this.dispatchEvent({'type': 'classification_visibility_changed', 'viewer': this});
+	setClassificationVisibility (key, value, attributeName=null) {
+		if(attributeName) {
+			if (!this.classifications[attributeName][key]) {
+				this.classifications[attributeName][key] = {visible: value, name: 'no name'};
+				this.dispatchEvent({'type': 'classification_visibility_changed', 'viewer': this});
+			} else if (this.classifications[attributeName][key].visible !== value) {
+				this.classifications[attributeName][key].visible = value;
+				this.dispatchEvent({'type': 'classification_visibility_changed', 'viewer': this});
+			}
+		}
+		else {
+			if (!this.classifications.DEFAULT[key]) {
+				this.classifications.DEFAULT[key] = {visible: value, name: 'no name'};
+				this.dispatchEvent({'type': 'classification_visibility_changed', 'viewer': this});
+			} else if (this.classifications.DEFAULT[key].visible !== value) {
+				this.classifications.DEFAULT[key].visible = value;
+				this.dispatchEvent({'type': 'classification_visibility_changed', 'viewer': this});
+			}
 		}
 	}
 
@@ -694,8 +705,8 @@ export class Viewer extends EventDispatcher{
 
 		let numVisible = 0;
 		let numItems = 0;
-		for(const key of Object.keys(this.classifications)){
-			if(this.classifications[key].visible){
+		for(const key of Object.keys(this.classifications.DEFAULT)){
+			if(this.classifications.DEFAULT[key].visible){
 				numVisible++;
 			}
 			numItems++;
@@ -708,9 +719,9 @@ export class Viewer extends EventDispatcher{
 
 		let somethingChanged = false;
 
-		for(const key of Object.keys(this.classifications)){
-			if(this.classifications[key].visible !== visible){
-				this.classifications[key].visible = visible;
+		for(const key of Object.keys(this.classifications.DEFAULT)){
+			if(this.classifications.DEFAULT[key].visible !== visible){
+				this.classifications.DEFAULT[key].visible = visible;
 				somethingChanged = true;
 			}
 		}
@@ -1205,6 +1216,8 @@ export class Viewer extends EventDispatcher{
 		}
 
 		let viewer = this;
+		this.mapView = new MapView(this);
+		this.mapView.init();
 		let sidebarContainer = $('#potree_sidebar_container');
 		sidebarContainer.load(new URL(Potree.scriptPath + '/sidebar.html').href, () => {
 			sidebarContainer.css('width', '300px');
@@ -1262,9 +1275,6 @@ export class Viewer extends EventDispatcher{
 					this.dispatchEvent({type: "vr_end"});
 				});
 			});
-
-			this.mapView = new MapView(this);
-			this.mapView.init();
 
 			i18n.init({
 				lng: 'en',
