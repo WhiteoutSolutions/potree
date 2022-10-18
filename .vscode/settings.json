@@ -17,4 +17,12 @@
 	"editor.mouseWheelZoom": true,
 	"editor.renderWhitespace": "all",
 	"workbench.tree.indent": 30,
+	"emeraldwalk.runonsave": {
+        "commands": [
+               {
+                   "match": "\\.js$",
+                   "cmd": "npm run build && Xcopy /E /I /Y \"./build/potree\" \"D:/Work/WhiteoutSolutions/Git/canopy/geosap-client/public/potree_libs/potree\""
+               }
+        ]
+    }
 }
