@@ -333,7 +333,7 @@ export class OctreeLoader{
 		};
 
 		for (const jsonAttribute of jsonAttributes) {
-			let {name, description, size, numElements, elementSize, min, max} = jsonAttribute;
+			let {name, description, size, numElements, elementSize, min, max, distinctValues} = jsonAttribute;
 
 			let type = typenameTypeattributeMap[jsonAttribute.type];
 
@@ -354,6 +354,10 @@ export class OctreeLoader{
 			}
 
 			attribute.initialRange = attribute.range;
+
+			if(distinctValues && distinctValues.length > 0) {
+				attribute.distinctValues = distinctValues;
+			}
 
 			attributes.add(attribute);
 		}

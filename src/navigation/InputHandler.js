@@ -9,6 +9,8 @@ import {KeyCodes} from "../KeyCodes.js";
 import {Utils} from "../utils.js";
 import {EventDispatcher} from "../EventDispatcher.js";
 
+const DOUBLE_TAP_TIMEOUT = 200; // 200ms
+
 export class InputHandler extends EventDispatcher {
 	constructor (viewer) {
 		super();
@@ -33,6 +35,7 @@ export class InputHandler extends EventDispatcher {
 		this.pressedKeys = {};
 
 		this.wheelDelta = 0;
+		this.lastTouchStartTime = 0;
 
 		this.speed = 1;
 
@@ -76,6 +79,16 @@ export class InputHandler extends EventDispatcher {
 
 	onTouchStart (e) {
 		if (this.logMessages) console.log(this.constructor.name + ': onTouchStart');
+
+		let date = new Date();
+		let time = date.getTime();
+
+		if(time - this.lastTouchStartTime < DOUBLE_TAP_TIMEOUT) {
+			this.onDoubleClick(e);
+		}
+		else {
+			this.lastTouchStartTime = time;
+		}
 
 		e.preventDefault();
 

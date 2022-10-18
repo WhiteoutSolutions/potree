@@ -99,7 +99,7 @@ export class ShapefileLoader{
 		}else if(geometry.type === "LineStringZ"){
 				let coordinates = [];
 				
-				let min = new Vector3(Infinity, Infinity, Infinity);
+				let min = new THREE.Vector3(Infinity, Infinity, Infinity);
 				for(let i = 0; i < geometry.coordinates.length; i++){
 					let [long, lat, height] = geometry.coordinates[i];
 					let pos = transform.forward([long, lat, height]);
@@ -165,7 +165,7 @@ export class ShapefileLoader{
 			}
 		}else if(geometry.type === "MultiPolygon"){
 			let coordinates = [];
-			let min = new Vector3(Infinity, Infinity, Infinity);
+			let min = new THREE.Vector3(Infinity, Infinity, Infinity);
 			for(let pcExternal of geometry.coordinates){
 				for(let pc of pcExternal){
 					console.log("Parsing pc " + JSON.stringify(pc));

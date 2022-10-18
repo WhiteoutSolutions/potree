@@ -61,6 +61,23 @@ export class MapView{
 			];
 		};
 
+		this.createMarkerStyle = (text) => {
+			return [
+				new ol.style.Style({
+					image: new ol.style.Circle({
+						radius: 10,
+						stroke: new ol.style.Stroke({
+							color: [255, 255, 255, 0.5],
+							width: 2
+						}),
+						fill: new ol.style.Fill({
+							color: [0, 0, 0, 0.5]
+						})
+					})
+				})
+			];
+		};
+
 		this.createLabelStyle = (text) => {
 			let style = new ol.style.Style({
 				image: new ol.style.Circle({
@@ -339,6 +356,37 @@ export class MapView{
 			this.getAnnotationsLayer().getSource().addFeature(feature);
 		};
 
+		this.onMarkerAdded = e => {
+			if (!this.sceneProjection) {
+				return;
+			}
+
+			let marker = e.marker;
+			let position = marker.position;
+			let mapPos = this.toMap.forward([position.x, position.y]);
+			let feature = new ol.Feature({
+				geometry: new ol.geom.Point(mapPos),
+				name: marker.description
+			});
+			feature.setStyle(this.createMarkerStyle(marker.description));
+
+			feature.onHover = evt => {
+				let coordinates = feature.getGeometry().getCoordinates();
+				let p = this.map.getPixelFromCoordinate(coordinates);
+
+				this.elTooltip.html(marker.description);
+				this.elTooltip.css('display', '');
+				this.elTooltip.css('left', `${p[0]}px`);
+				this.elTooltip.css('top', `${p[1]}px`);
+			};
+
+			feature.onClick = evt => {
+				marker.clickTitle();
+			};
+
+			this.getAnnotationsLayer().getSource().addFeature(feature);
+		};
+
 		this.setScene(this.viewer.scene);
 	}
 
@@ -351,6 +399,7 @@ export class MapView{
 			this.scene.removeEventListener('pointcloud_added', this.onPointcloudAdded);
 			this.scene.removeEventListener('360_images_added', this.on360ImagesAdded);
 			this.scene.annotations.removeEventListener('annotation_added', this.onAnnotationAdded);
+			this.scene.markers.removeEventListener('marker_added', this.onMarkerAdded);
 		}
 
 		this.scene = scene;
@@ -358,6 +407,7 @@ export class MapView{
 		this.scene.addEventListener('pointcloud_added', this.onPointcloudAdded);
 		this.scene.addEventListener('360_images_added', this.on360ImagesAdded);
 		this.scene.annotations.addEventListener('annotation_added', this.onAnnotationAdded);
+		this.scene.markers.addEventListener('marker_added', this.onMarkerAdded);
 
 		for (let pointcloud of this.viewer.scene.pointclouds) {
 			this.load(pointcloud);
@@ -365,6 +415,10 @@ export class MapView{
 
 		this.viewer.scene.annotations.traverseDescendants(annotation => {
 			this.onAnnotationAdded({annotation: annotation});
+		});
+
+		this.viewer.scene.markers.traverseDescendants(marker => {
+			this.onMarkersAdded({marker: marker});
 		});
 
 		for(let images of this.viewer.scene.images360){

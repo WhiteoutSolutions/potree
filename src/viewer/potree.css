@@ -309,6 +309,123 @@ a:hover, a:visited, a:link, a:active{
 	opacity:	0.5;
 }
 
+.marker{
+	position:		absolute;
+	padding:		10px;
+	opacity:		0.5;
+	transform:		translate(-50%, -30px);
+	will-change:	left, top;
+}
+
+.marker-icon-container{
+	opacity:		1;
+	margin:			auto;
+	display:		table;
+	padding:		1px 8px;
+	cursor: 		pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.marker-expand{
+	color:			white;
+	font-size:		0.6em;
+	opacity:		1;
+}
+
+.marker-action-icon{
+	width:			20px;
+	height:			20px;
+	display:		inline-block;
+	vertical-align:	middle;
+	line-height:	1.5em;
+	text-align:		center;
+	font-family:	Arial;
+	font-weight:	bold;
+	cursor: 		pointer;
+}
+
+.marker-action-icon:hover{
+	filter:			drop-shadow(0px 0px 1px white);
+	width:			24px;
+	height:			24px;
+	cursor: 		pointer;
+	
+}
+
+.marker-item {
+	color:			white;
+	background-color: 	black;
+	opacity:		0.5;
+	border-radius:	1.5em;
+	font-size:		1em;
+	line-height:	1.5em;
+	padding:		1px 8px 0px 8px;
+	font-weight:	bold;
+	display:		flex;
+	cursor:			default;
+}
+
+.marker-item:hover {
+	opacity:		1.0;
+	box-shadow:		0 0 5px #ffffff;
+}
+
+.marker-main{
+	display:		flex;
+	flex-grow:		1;
+}
+
+.marker-label{
+	display:		inline-block;
+	height:			100%;
+	flex-grow:		1;
+	user-select:	none;
+	-moz-user-select: none;
+	z-index:		100;
+	vertical-align:	middle;
+	line-height:	1.5em;
+	font-family:	Arial;
+	font-weight:	bold;
+	cursor: 		pointer;
+	white-space:	nowrap;
+}
+
+.marker-description{
+	position:		relative;
+	color:			white;
+	background-color:	black;
+	padding:		10px;
+	margin:			5px 0px 0px 0px;
+	border-radius:	4px;
+	display:		none;
+	max-width:		500px;
+}
+
+.marker-description-close{
+	filter:			invert(100%);
+	float:			right;
+	opacity:		0.5;
+	margin:			0px 0px 8px 8px;
+}
+
+	
+.marker-description-content{
+	color:			white;
+}
+
+.marker-icon{
+	width:		40px;
+	height:		40px;
+	filter:		invert(100%);
+	margin:		2px 2px;
+	opacity:	0.5;
+}
+
 
 canvas { 
 	width: 100%; 

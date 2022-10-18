@@ -433,7 +433,7 @@ vec3 getGpsTime(){
 
 vec3 getElevation(){
 	vec4 world = modelMatrix * vec4( position, 1.0 );
-	vec3 cElevation = vec3(0.5,0.5,0.5); // TODO: Here is an hardcoded color for outside range points
+	vec3 cElevation = vec3(0.8,0.3,0.3); // TODO: Here is an hardcoded color for outside range points
 	if(world.z >= elevationRange.x && world.z <= elevationRange.y) {
 		float w = (world.z - elevationRange.x) / (elevationRange.y - elevationRange.x);
 		cElevation = texture2D(gradient, vec2(w,1.0-w)).rgb;

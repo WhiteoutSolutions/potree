@@ -17,6 +17,7 @@ import {Message} from "../utils/Message.js";
 import {Sidebar} from "./sidebar.js";
 
 import {AnnotationTool} from "../utils/AnnotationTool.js";
+import {MarkerTool} from "../utils/MarkerTool.js";
 import {MeasuringTool} from "../utils/MeasuringTool.js";
 import {ProfileTool} from "../utils/ProfileTool.js";
 import {VolumeTool} from "../utils/VolumeTool.js";
@@ -78,6 +79,13 @@ export class Viewer extends EventDispatcher{
 					<div id="potree_annotation_container" 
 						style="position: absolute; z-index: 100000; width: 100%; height: 100%; pointer-events: none;"></div>`);
 				$(domElement).append(potreeAnnotationContainer);
+			}
+
+			if ($(domElement).find('#potree_markers').length === 0) {
+				let potreeMarkerContainer = $(`
+					<div id="potree_marker_container" 
+						style="position: absolute; z-index: 100000; width: 100%; height: 100%; pointer-events: none;"></div>`);
+				$(domElement).append(potreeMarkerContainer);
 			}
 
 			if ($(domElement).find('#potree_quick_buttons').length === 0) {
@@ -322,6 +330,7 @@ export class Viewer extends EventDispatcher{
 		this.loadGUI = this.loadGUI.bind(this);
 
 		this.annotationTool = new AnnotationTool(this);
+		this.markerTool = new MarkerTool(this);
 		this.measuringTool = new MeasuringTool(this);
 		this.profileTool = new ProfileTool(this);
 		this.volumeTool = new VolumeTool(this);
@@ -421,6 +430,36 @@ export class Viewer extends EventDispatcher{
 				oldScene.annotations.removeEventListener('annotation_added', this.onAnnotationAdded);
 			}
 			this.scene.annotations.addEventListener('annotation_added', this.onAnnotationAdded);
+		}
+
+		{ // Markers
+			$('.marker').detach();
+
+			// for(let annotation of this.scene.annotations){
+			//	this.renderArea.appendChild(annotation.domElement[0]);
+			// }
+
+			this.scene.markers.traverse(marker => {
+				this.renderArea.appendChild(marker.domElement[0]);
+			});
+
+			if (!this.onMarkerAdded) {
+				this.onMarkerAdded = e => {
+				console.log("marker added: " + e.marker.description);
+
+					e.marker.traverse(node => {
+
+						$("#potree_marker_container").append(node.domElement);
+						//this.renderArea.appendChild(node.domElement[0]);
+						node.scene = this.scene;
+					});
+				};
+			}
+
+			if (oldScene) {
+				oldScene.markers.removeEventListener('marker_added', this.onMarkerAdded);
+			}
+			this.scene.markers.addEventListener('marker_added', this.onMarkerAdded);
 		}
 	};
 
@@ -668,6 +707,22 @@ export class Viewer extends EventDispatcher{
 
 	enableAnnotations () {
 		this.scene.annotations.traverse(annotation => {
+			annotation.domElement.css('pointer-events', 'auto');
+
+			// return annotation.visible;
+		});
+	}
+
+	disableMarkers () {
+		this.scene.markers.traverse(annotation => {
+			annotation.domElement.css('pointer-events', 'none');
+
+			// return annotation.visible;
+		});
+	};
+
+	enableMarkers () {
+		this.scene.markers.traverse(annotation => {
 			annotation.domElement.css('pointer-events', 'auto');
 
 			// return annotation.visible;
@@ -1126,6 +1181,8 @@ export class Viewer extends EventDispatcher{
 			this.fpControls.enabled = false;
 			this.fpControls.addEventListener('start', this.disableAnnotations.bind(this));
 			this.fpControls.addEventListener('end', this.enableAnnotations.bind(this));
+			this.fpControls.addEventListener('start', this.disableMarkers.bind(this));
+			this.fpControls.addEventListener('end', this.enableMarkers.bind(this));
 		}
 
 		// { // create GEO CONTROLS
@@ -1143,6 +1200,8 @@ export class Viewer extends EventDispatcher{
 			this.orbitControls.enabled = false;
 			this.orbitControls.addEventListener('start', this.disableAnnotations.bind(this));
 			this.orbitControls.addEventListener('end', this.enableAnnotations.bind(this));
+			this.orbitControls.addEventListener('start', this.disableMarkers.bind(this));
+			this.orbitControls.addEventListener('end', this.enableMarkers.bind(this));
 		}
 
 		{ // create EARTH CONTROLS
@@ -1150,6 +1209,8 @@ export class Viewer extends EventDispatcher{
 			this.earthControls.enabled = false;
 			this.earthControls.addEventListener('start', this.disableAnnotations.bind(this));
 			this.earthControls.addEventListener('end', this.enableAnnotations.bind(this));
+			this.earthControls.addEventListener('start', this.disableMarkers.bind(this));
+			this.earthControls.addEventListener('end', this.enableMarkers.bind(this));
 		}
 
 		{ // create DEVICE ORIENTATION CONTROLS
@@ -1157,6 +1218,8 @@ export class Viewer extends EventDispatcher{
 			this.deviceControls.enabled = false;
 			this.deviceControls.addEventListener('start', this.disableAnnotations.bind(this));
 			this.deviceControls.addEventListener('end', this.enableAnnotations.bind(this));
+			this.deviceControls.addEventListener('start', this.disableMarkers.bind(this));
+			this.deviceControls.addEventListener('end', this.enableMarkers.bind(this));
 		}
 
 		{ // create VR CONTROLS
@@ -1164,6 +1227,8 @@ export class Viewer extends EventDispatcher{
 			this.vrControls.enabled = false;
 			this.vrControls.addEventListener('start', this.disableAnnotations.bind(this));
 			this.vrControls.addEventListener('end', this.enableAnnotations.bind(this));
+			this.vrControls.addEventListener('start', this.disableMarkers.bind(this));
+			this.vrControls.addEventListener('end', this.enableMarkers.bind(this));
 		}
 
 
@@ -1483,6 +1548,7 @@ export class Viewer extends EventDispatcher{
 		}
 
 		this.scene.annotations.updateBounds();
+		this.scene.markers.updateBounds();
 		this.scene.cameraP.updateMatrixWorld();
 		this.scene.cameraO.updateMatrixWorld();
 		
@@ -1580,6 +1646,113 @@ export class Viewer extends EventDispatcher{
 
 		for(let annotation of notVisibleAnymore){
 			annotation.display = false;
+		}
+	}
+
+	updateMarkers () {
+
+		if(!this.visibleMarkers){
+			this.visibleMarkers = new Set();
+		}
+
+		this.scene.markers.updateBounds();
+		this.scene.cameraP.updateMatrixWorld();
+		this.scene.cameraO.updateMatrixWorld();
+		
+		let distances = [];
+
+		let renderAreaSize = this.renderer.getSize(new THREE.Vector2());
+
+		let viewer = this;
+
+		let visibleNow = [];
+		this.scene.markers.traverse(marker => {
+
+			if (marker === this.scene.markers) {
+				return true;
+			}
+
+			if (!marker.visible) {
+				return false;
+			}
+
+			marker.scene = this.scene;
+
+			let element = marker.domElement;
+
+			let position = marker.position.clone();
+			position.add(marker.offset);
+			if (!position) {
+				position = marker.boundingBox.getCenter(new THREE.Vector3());
+			}
+
+			let distance = viewer.scene.cameraP.position.distanceTo(position);
+			let radius = marker.boundingBox.getBoundingSphere(new THREE.Sphere()).radius;
+
+			let screenPos = new THREE.Vector3();
+			let screenSize = 0;
+
+			{
+				// SCREEN POS
+				screenPos.copy(position).project(this.scene.getActiveCamera());
+				screenPos.x = renderAreaSize.x * (screenPos.x + 1) / 2;
+				screenPos.y = renderAreaSize.y * (1 - (screenPos.y + 1) / 2);
+
+
+				// SCREEN SIZE
+				if(viewer.scene.cameraMode == CameraMode.PERSPECTIVE) {
+					let fov = Math.PI * viewer.scene.cameraP.fov / 180;
+					let slope = Math.tan(fov / 2.0);
+					let projFactor =  0.5 * renderAreaSize.y / (slope * distance);
+					screenSize = radius * projFactor;
+				} else {
+					screenSize = Utils.projectedRadiusOrtho(radius, viewer.scene.cameraO.projectionMatrix, renderAreaSize.x, renderAreaSize.y);
+				}
+			}
+
+			element.css("left", screenPos.x + "px");
+			element.css("top", screenPos.y + "px");
+			//element.css("display", "block");
+
+			let zIndex = 10000000 - distance * (10000000 / this.scene.cameraP.far);
+			if(marker.descriptionVisible){
+				//zIndex += 10000000;
+			}
+			//element.css("z-index", parseInt(zIndex));
+
+			if(marker.children.length > 0){
+				let expand = screenSize > marker.collapseThreshold || marker.boundingBox.containsPoint(this.scene.getActiveCamera().position);
+				marker.expand = expand;
+
+				if (!expand) {
+					//annotation.display = (screenPos.z >= -1 && screenPos.z <= 1);
+					let inFrustum = (screenPos.z >= -1 && screenPos.z <= 1);
+					if(inFrustum){
+						visibleNow.push(marker);
+					}
+				}
+
+				return expand;
+			} else {
+				//annotation.display = (screenPos.z >= -1 && screenPos.z <= 1);
+				let inFrustum = (screenPos.z >= -1 && screenPos.z <= 1);
+				if(inFrustum){
+					visibleNow.push(marker);
+				}
+			}
+			
+		});
+
+		let notVisibleAnymore = new Set(this.visibleMarkers);
+		for(let marker of visibleNow){
+			marker.display = true;
+			
+			notVisibleAnymore.delete(marker);
+		}
+		this.visibleMarkers = visibleNow;
+
+		for(let marker of notVisibleAnymore){
+			marker.display = false;
 		}
 
 	}
@@ -1881,6 +2054,7 @@ export class Viewer extends EventDispatcher{
 		}
 
 		this.updateAnnotations();
+		this.updateMarkers();
 		
 		if(this.mapView){
 			this.mapView.update(delta);

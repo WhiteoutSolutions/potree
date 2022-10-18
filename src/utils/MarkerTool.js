@@ -1,11 +1,11 @@
 
 import * as THREE from "../../libs/three.js/build/three.module.js";
-import {Annotation} from "../Annotation.js";
+import {Marker} from "../Marker.js";
 import {Utils} from "../utils.js";
 import {CameraMode} from "../defines.js";
 import {EventDispatcher} from "../EventDispatcher.js";
 
-export class AnnotationTool extends EventDispatcher{
+export class MarkerTool extends EventDispatcher{
 	constructor (viewer) {
 		super();
 
@@ -20,19 +20,19 @@ export class AnnotationTool extends EventDispatcher{
 	startInsertion (args = {}) {
 		let domElement = this.viewer.renderer.domElement;
 
-		let annotation = new Annotation({
+		let marker = new Marker({
 			position: [589748.270, 231444.540, 753.675],
 			title: "Annotation Title",
 			description: `Annotation Description`,
 			onRemove: ()=>{
-				annotations.remove(annotation);
+				markers.remove(marker);
 			}
 		});
-		annotation.doneCallback = args.callback;
-		this.dispatchEvent({type: 'start_inserting_annotation', annotation: annotation});
+		marker.doneCallback = args.callback;
+		this.dispatchEvent({type: 'start_inserting_marker', marker: marker});
 
-		const annotations = this.viewer.scene.annotations;
-		annotations.add(annotation);
+		const markers = this.viewer.scene.markers;
+		markers.add(marker);
 
 		let callbacks = {
 			cancel: null,
@@ -47,12 +47,12 @@ export class AnnotationTool extends EventDispatcher{
 			}
 		};
 
-		if(annotation.doneCallback) {
-			annotation.doneCallback();
+		if(marker.doneCallback) {
+			marker.doneCallback();
 		}
 
 		callbacks.cancel = e => {
-			annotations.remove(annotation);
+			markers.remove(marker);
 
 			domElement.removeEventListener('mouseup', insertionCallback, true);
 		};
@@ -74,7 +74,7 @@ export class AnnotationTool extends EventDispatcher{
 			if (I) {
 				this.s.position.copy(I.location);
 
-				annotation.position.copy(I.location);
+				marker.position.copy(I.location);
 			}
 		};
 
@@ -90,25 +90,25 @@ export class AnnotationTool extends EventDispatcher{
 		this.viewer.scene.scene.add(this.s);
 		this.viewer.inputHandler.startDragging(this.s);
 
-		return annotation;
+		return marker;
 	}
 	
 
-	createAnnotation (args = {}) {
+	createMarker (args = {}) {
 		let domElement = this.viewer.renderer.domElement;
 
-		let annotation = new Annotation({
+		let marker = new Marker({
 			position: args.position,
-			title: args.title,
-			description: `Annotation Description`,
+			description: args.description,
 			onRemove: ()=>{
-				annotations.remove(annotation);
+				markers.remove(marker);
 			}
 		});
-		annotation.doneCallback = args.callback;
+		marker.doneCallback = args.callback;
+		this.dispatchEvent({type: 'start_inserting_marker', marker: marker});
 
-		const annotations = this.viewer.scene.annotations;
-		annotations.add(annotation);
+		const markers = this.viewer.scene.markers;
+		markers.add(marker);
 	}
 
 	update(){

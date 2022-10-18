@@ -1,6 +1,7 @@
 
 import * as THREE from "../../libs/three.js/build/three.module.js";
 import {Annotation} from "../Annotation.js";
+import {Marker} from "../Marker.js";
 import {CameraMode} from "../defines.js";
 import {View} from "./View.js";
 import {Utils} from "../utils.js";
@@ -13,6 +14,7 @@ export class Scene extends EventDispatcher{
 		super();
 
 		this.annotations = new Annotation();
+		this.markers = new Marker();
 		
 		this.scene = new THREE.Scene();
 		this.sceneBG = new THREE.Scene();
@@ -433,5 +435,25 @@ export class Scene extends EventDispatcher{
 
 	removeAnnotation(annotationToRemove) {
 		this.annotations.remove(annotationToRemove);
+	}
+	
+	addMarker(position, args = {}){		
+		if(position instanceof Array){
+			args.position = new THREE.Vector3().fromArray(position);
+		} else if (position.x != null) {
+			args.position = position;
+		}
+		let marker = new Marker(args);
+		this.markers.add(marker);
+
+		return marker;
+	}
+
+	getMarkers () {
+		return this.markers;
+	};
+
+	removeMarker(markerToRemove) {
+		this.markers.remove(markerToRemove);
 	}
 };
