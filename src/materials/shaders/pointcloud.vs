@@ -451,7 +451,7 @@ vec4 getClassification(){
 
 vec4 getExtraClassification(){
 	float w = (aExtra + uExtraOffset) * uExtraScale;
-	vec2 uv = vec2(w*52.0/255.0, 0.5);
+	vec2 uv = vec2(w/255.0, 0.5);
 	vec4 classColor = texture2D(classificationLUT, uv);
 	
 	return classColor;
