@@ -301,6 +301,10 @@ a:hover, a:visited, a:link, a:active{
 	color:			white;
 }
 
+.annotation-description-input{
+	display: none;
+}
+
 .annotation-icon{
 	width:		20px;
 	height:		20px;

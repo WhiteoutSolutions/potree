@@ -47,18 +47,21 @@ export class AnnotationTool extends EventDispatcher{
 			}
 		};
 
-		if(annotation.doneCallback) {
-			annotation.doneCallback();
-		}
 
 		callbacks.cancel = e => {
 			annotations.remove(annotation);
 
 			domElement.removeEventListener('mouseup', insertionCallback, true);
+			if(annotation.doneCallback) {
+				annotation.doneCallback();
+			}
 		};
 
 		callbacks.finish = e => {
 			domElement.removeEventListener('mouseup', insertionCallback, true);
+			if(annotation.doneCallback) {
+				annotation.doneCallback();
+			}
 		};
 
 		domElement.addEventListener('mouseup', insertionCallback, true);
