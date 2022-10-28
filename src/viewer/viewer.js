@@ -415,7 +415,6 @@ export class Viewer extends EventDispatcher{
 
 			if (!this.onAnnotationAdded) {
 				this.onAnnotationAdded = e => {
-				// console.log("annotation added: " + e.annotation.title);
 
 					e.annotation.traverse(node => {
 

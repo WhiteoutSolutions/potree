@@ -39,8 +39,6 @@ export class TextSprite extends THREE.Object3D{
 		this.iconImage.src = this.iconClose;
 		const thisObj = this;
 		this.iconImage.onload = function() {
-			console.log("Image loaded " + thisObj.iconClose);
-			console.log("Image " + thisObj.iconImage.src);
 			thisObj.update();
 		};
 
