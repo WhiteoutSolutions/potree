@@ -418,7 +418,7 @@ export class MapView{
 		});
 
 		this.viewer.scene.markers.traverseDescendants(marker => {
-			this.onMarkersAdded({marker: marker});
+			this.onMarkerAdded({marker: marker});
 		});
 
 		for(let images of this.viewer.scene.images360){
