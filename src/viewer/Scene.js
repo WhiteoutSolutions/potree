@@ -29,6 +29,7 @@ export class Scene extends EventDispatcher{
 		this.overrideCamera = null;
 		this.pointclouds = [];
 
+		this.shapefiles = [];
 		this.measurements = [];
 		this.profiles = [];
 		this.volumes = [];
@@ -130,6 +131,54 @@ export class Scene extends EventDispatcher{
 			type: 'pointcloud_added',
 			pointcloud: pointcloud
 		});
+	}
+
+	removePointCloud (pointcloud) {
+		let index = this.pointclouds.indexOf(pointcloud);
+		if (index > -1) {
+			this.pointclouds.splice(index, 1);
+			this.scenePointCloud.remove(pointcloud);
+			this.dispatchEvent({
+				'type': 'pointcloud_removed',
+				'scene': this,
+				'pointcloud': pointcloud
+			});
+		}
+	}
+
+	removeAllPointClouds(){
+		while (this.pointclouds.length > 0) {
+			this.removePointCloud(this.pointclouds[0]);
+		}
+	}
+
+	addShapefile (shapefile) {
+		this.shapefiles.push(shapefile);
+		this.scene.add(shapefile);
+
+		this.dispatchEvent({
+			type: 'shapefile_added',
+			shapefile: shapefile
+		});
+	}
+
+	removeShapefile (shapefile) {
+		let index = this.shapefiles.indexOf(shapefile);
+		if (index > -1) {
+			this.shapefiles.splice(index, 1);
+			this.scene.remove(shapefile);
+			this.dispatchEvent({
+				'type': 'shapefile_removed',
+				'scene': this,
+				'shapefile': shapefile
+			});
+		}
+	}
+
+	removeAllShapefiles(){
+		while (this.shapefiles.length > 0) {
+			this.removeShapefile(this.shapefiles[0]);
+		}
 	}
 
 	addVolume (volume) {
@@ -436,6 +485,12 @@ export class Scene extends EventDispatcher{
 	removeAnnotation(annotationToRemove) {
 		this.annotations.remove(annotationToRemove);
 	}
+
+	removeAllAnnotations(){
+		while (this.annotations.length > 0) {
+			this.removeAnnotation(this.annotations[0]);
+		}
+	}
 	
 	addMarker(position, args = {}){		
 		if(position instanceof Array){
@@ -455,5 +510,25 @@ export class Scene extends EventDispatcher{
 
 	removeMarker(markerToRemove) {
 		this.markers.remove(markerToRemove);
+	}
+
+	removeAllMarkers(){
+		while (this.markers.length > 0) {
+			this.removeMarker(this.markers[0]);
+		}
+	}
+
+	clear(){
+		this.removeAllPointClouds();
+		this.removeAllShapefiles();
+		this.removeAllMeasurements();
+		this.removeAllClipVolumes();
+		this.removeAllAnnotations();
+		this.removeAllMarkers();
+
+
+		//while(this.scene.children.length > 0){ 
+		//    this.scene.remove(this.scene.children[0]); 
+		//}
 	}
 };
