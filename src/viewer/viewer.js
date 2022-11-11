@@ -737,7 +737,7 @@ export class Viewer extends EventDispatcher{
 	setClassificationVisibility (key, value, attributeName=null) {
 		if(attributeName) {
 			if (!this.classifications[attributeName][key]) {
-				this.classifications[attributeName][key] = {visible: value, name: 'no name'};
+				this.classifications[attributeName][key] = {visible: value, name: 'no name', color: [0.3,  0.6,  0.6,  0.5]};
 				this.dispatchEvent({'type': 'classification_visibility_changed', 'viewer': this});
 			} else if (this.classifications[attributeName][key].visible !== value) {
 				this.classifications[attributeName][key].visible = value;
@@ -746,7 +746,7 @@ export class Viewer extends EventDispatcher{
 		}
 		else {
 			if (!this.classifications.DEFAULT[key]) {
-				this.classifications.DEFAULT[key] = {visible: value, name: 'no name'};
+				this.classifications.DEFAULT[key] = {visible: value, name: 'no name', color: [0.3,  0.6,  0.6,  0.5]};
 				this.dispatchEvent({'type': 'classification_visibility_changed', 'viewer': this});
 			} else if (this.classifications.DEFAULT[key].visible !== value) {
 				this.classifications.DEFAULT[key].visible = value;
