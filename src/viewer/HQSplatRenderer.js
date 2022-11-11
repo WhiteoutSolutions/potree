@@ -147,6 +147,7 @@ export class HQSplatRenderer{
 				depthMaterial.maxSize = material.maxSize;
 
 				depthMaterial.pointSizeType = material.pointSizeType;
+				depthMaterial.activeAttributeName = material.activeAttributeName;
 				depthMaterial.visibleNodesTexture = material.visibleNodesTexture;
 				depthMaterial.weighted = false;
 				depthMaterial.screenWidth = width;
@@ -228,6 +229,8 @@ export class HQSplatRenderer{
 				attributeMaterial.weightClassification = material.weightClassification;
 				attributeMaterial.weightReturnNumber = material.weightReturnNumber;
 				attributeMaterial.weightSourceID = material.weightSourceID;
+
+				attributeMaterial.ranges = new Map(material.ranges);
 
 				attributeMaterial.color = material.color;
 

@@ -443,15 +443,13 @@ vec3 getElevation(){
 }
 
 vec4 getClassification(){
-	vec2 uv = vec2(classification / 255.0, 0.5);
-	vec4 classColor = texture2D(classificationLUT, uv);
+	#ifdef color_type_extra_classification
+		float w = (aExtra + uExtraOffset) * uExtraScale;
+		vec2 uv = vec2(w/255.0, 0.5);
+	#else
+		vec2 uv = vec2(classification / 255.0, 0.5);
+	#endif
 	
-	return classColor;
-}
-
-vec4 getExtraClassification(){
-	float w = (aExtra + uExtraOffset) * uExtraScale;
-	vec2 uv = vec2(w/255.0, 0.5);
 	vec4 classColor = texture2D(classificationLUT, uv);
 	
 	return classColor;
@@ -663,9 +661,6 @@ vec3 getColor(){
 		color = getCompositeColor();
 	#elif defined color_type_matcap
 		color = getMatcap();
-	#elif defined color_type_extra_classification
-		vec4 cl = getExtraClassification();
-		color = cl.rgb;
 	#else 
 		color = getExtra();
 	#endif
@@ -761,14 +756,10 @@ bool pointInClipPolygon(vec3 point, int polyIdx) {
 void doClipping(){
 
 	{
-		#ifdef color_type_extra_classification
-			vec4 cl = getExtraClassification(); 
-		#else
-			vec4 cl = getClassification(); 
-		#endif
+		vec4 cl = getClassification(); 
 		if(cl.a == 0.0){
 			gl_Position = vec4(100.0, 100.0, 100.0, 0.0);
-			
+
 			return;
 		}
 	}

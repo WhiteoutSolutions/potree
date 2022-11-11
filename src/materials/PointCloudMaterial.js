@@ -257,12 +257,11 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
 
 			if(this.activeAttributeName.match(/classification/i) && this.activeAttributeName !== "classification") {
 				defines.push(`#define color_type_extra_classification`);
+				defines.push(`#define color_type_classification`);
 			}
 			else {
 				defines.push(`#define color_type_${attributeName}`);
 			}
-
-			defines.push(`#define color_type_${attributeName}`);
 		}
 		
 		if(this._treeType === TreeType.OCTREE){
