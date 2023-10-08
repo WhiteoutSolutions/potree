@@ -6,11 +6,11 @@
 	},
 	"files.trimTrailingWhitespace": false,
 	"editor.fontSize": 28,
-	"editor.autoIndent": false,
+	"editor.autoIndent": "advanced",
 	"editor.detectIndentation": false,
 	"editor.insertSpaces": false,
 	"editor.minimap.enabled": false,
-	"editor.autoClosingBrackets": false,
+	"editor.autoClosingBrackets": "never",
 	"editor.formatOnType": false,
 	"editor.acceptSuggestionOnEnter": "off",
 	"editor.acceptSuggestionOnCommitCharacter": false,
@@ -21,8 +21,11 @@
         "commands": [
                {
                    "match": "\\.js$",
-                   "cmd": "npm run build && Xcopy /E /I /Y \"./build/potree\" \"D:/Work/WhiteoutSolutions/Git/canopy/geosap-client/public/potree_libs/potree\""
+                   //"cmd": "npm run build && Xcopy /E /I /Y \"./build/potree\" \"/Users/ysevigny/Documents/Work/WhiteoutSolutions/Git/geosap/public/potree_libs/potree\""
+                   "cmd": "npm run build && cp -R \"./build/potree\" \"/Users/ysevigny/Documents/Work/WhiteoutSolutions/Git/geosap/geosap-client/public/potree_libs/\""
                }
         ]
-    }
+    },
+  "editor.autoClosingQuotes": "never",
+  "editor.autoSurround": "never"
 }
