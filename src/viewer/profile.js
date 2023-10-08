@@ -277,7 +277,9 @@ export class ProfileWindow extends EventDispatcher {
 
 		this.pRenderer = new Renderer(this.renderer);
 
-		this.elRoot.i18n();
+		if(this.elRoot.i18n) {
+			this.elRoot.i18n();
+		}
 	}
 
 	initListeners () {
@@ -374,10 +376,6 @@ export class ProfileWindow extends EventDispatcher {
 							let offset = range[0];
 							transform = value => value / scale + offset;
 						}
-
-						
-
-						
 
 						if (attributeName === 'position') {
 							let values = [...position].map(v => Utils.addCommas(v.toFixed(3)));
@@ -791,6 +789,7 @@ export class ProfileWindow extends EventDispatcher {
 	}
 
 	hide () {
+		this.dispatchEvent({type: "profileWindowClosed"});
 		this.elRoot.fadeOut();
 		this.enabled = false;
 	}

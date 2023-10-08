@@ -1282,6 +1282,30 @@ export class Viewer extends EventDispatcher{
 		let viewer = this;
 		this.mapView = new MapView(this);
 		this.mapView.init();
+
+		let elProfile = $('<div>').load(new URL(Potree.scriptPath + '/profile.html').href, () => {
+			console.log("Loaded profile window ");
+			$(document.body).append(elProfile.children());
+			this.profileWindow = new ProfileWindow(this);
+			this.profileWindowController = new ProfileWindowController(this);
+
+			$('#profile_window').draggable({
+				handle: $('#profile_titlebar'),
+				containment: $(document.body)
+			});
+			$('#profile_window').resizable({
+				containment: $(document.body),
+				handles: 'n, e, s, w'
+			});
+
+			$(() => {
+				this.guiLoaded = true;
+				for(let task of this.guiLoadTasks){
+					task();
+				}
+			});
+		});
+
 		let sidebarContainer = $('#potree_sidebar_container');
 		sidebarContainer.load(new URL(Potree.scriptPath + '/sidebar.html').href, () => {
 			sidebarContainer.css('width', '300px');
@@ -1361,32 +1385,6 @@ export class Viewer extends EventDispatcher{
 				//if (callback) {
 				//	$(callback);
 				//}
-
-				let elProfile = $('<div>').load(new URL(Potree.scriptPath + '/profile.html').href, () => {
-					$(document.body).append(elProfile.children());
-					this.profileWindow = new ProfileWindow(this);
-					this.profileWindowController = new ProfileWindowController(this);
-
-					$('#profile_window').draggable({
-						handle: $('#profile_titlebar'),
-						containment: $(document.body)
-					});
-					$('#profile_window').resizable({
-						containment: $(document.body),
-						handles: 'n, e, s, w'
-					});
-
-					$(() => {
-						this.guiLoaded = true;
-						for(let task of this.guiLoadTasks){
-							task();
-						}
-
-					});
-				});
-
-				
-
 			});
 
 			

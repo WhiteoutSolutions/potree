@@ -53,8 +53,17 @@ export class ProfileTool extends EventDispatcher {
 	startInsertion (args = {}) {
 		let domElement = this.viewer.renderer.domElement;
 
+		const pick = (defaul, alternative) => {
+			if(defaul != null){
+				return defaul;
+			}else{
+				return alternative;
+			}
+		};
+
 		let profile = new Profile();
 		profile.name = args.name || 'Profile';
+		profile.doneCallback = pick(args.callback, null);
 
 		this.dispatchEvent({
 			type: 'start_inserting_profile',
@@ -92,6 +101,9 @@ export class ProfileTool extends EventDispatcher {
 			profile.removeMarker(profile.points.length - 1);
 			domElement.removeEventListener('mouseup', insertionCallback, true);
 			this.viewer.removeEventListener('cancel_insertions', cancel.callback);
+			if(profile.doneCallback){
+				profile.doneCallback();
+			}
 		};
 
 		this.viewer.addEventListener('cancel_insertions', cancel.callback);
