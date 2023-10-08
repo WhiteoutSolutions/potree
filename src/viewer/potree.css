@@ -615,6 +615,10 @@ body{
 	transition: top .35s, left .35s, bottom .35s, right .35s, width .35s;
 }
 
+#potree_window{
+	background-color:	var(--bg-color);
+}
+
 #profile_window{
 	background-color:	var(--bg-color);
 }
