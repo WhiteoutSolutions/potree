@@ -869,8 +869,11 @@ export class Viewer extends EventDispatcher{
 			bs = node.boundingSphere;
 		} else if (node.geometry && node.geometry.boundingSphere) {
 			bs = node.geometry.boundingSphere;
-		} else {
+		} else if(node.boundingBox){
 			bs = node.boundingBox.getBoundingSphere(new THREE.Sphere());
+		} else {
+			var bbox = new THREE.Box3().setFromObject(node);
+			bs = bbox.getBoundingSphere(new THREE.Sphere())
 		}
 		bs = bs.clone().applyMatrix4(node.matrixWorld); 
 

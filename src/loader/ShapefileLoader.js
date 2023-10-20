@@ -19,13 +19,26 @@ export class ShapefileLoader{
 			dashed: false
 		} );
 
+		this.transform = await this.loadShapefilePrjTransform(path);
+
 		const features = await this.loadShapefileFeatures(path);
 		const node = new THREE.Object3D();
+		
+		const childBoundingBoxes = [];
 		
 		for(const feature of features){
 			const fnode = this.featureToSceneNode(feature, matLine);
 			node.add(fnode);
+			if (fnode.boundingBox) {
+				childBoundingBoxes.push(fnode.boundingBox.clone()); // Clone to avoid modifying original boxes.
+			}
 		}
+		const overallBoundingBox = new THREE.Box3();
+		for (const childBoundingBox of childBoundingBoxes) {
+			overallBoundingBox.union(childBoundingBox);
+		}
+
+		node.boundingBox = overallBoundingBox;
 
 		let setResolution = (x, y) => {
 			matLine.resolution.set(x, y);
@@ -49,6 +62,9 @@ export class ShapefileLoader{
 		if(transform === null){
 			transform = {forward: (v) => v};
 		}
+
+		let node;
+		let boundingBox = new THREE.Box3();
 		
 		if(feature.geometry.type === "Point"){
 			let sg = new THREE.SphereGeometry(1, 18, 18);
@@ -62,11 +78,15 @@ export class ShapefileLoader{
 			
 			s.scale.set(10, 10, 10);
 			
-			return s;
+			let min = new THREE.Vector3(...pos, 20).clone().sub(new THREE.Vector3(10, 10, 10));
+			let max = new THREE.Vector3(...pos, 20).clone().add(new THREE.Vector3(10, 10, 10));
+			boundingBox.set(min, max);
+			node = s;
 		}else if(geometry.type === "LineString"){
 			let coordinates = [];
 			
 			let min = new THREE.Vector3(Infinity, Infinity, Infinity);
+        	let max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
 			for(let i = 0; i < geometry.coordinates.length; i++){
 				let [long, lat] = geometry.coordinates[i];
 				let pos = transform.forward([long, lat]);
@@ -74,6 +94,10 @@ export class ShapefileLoader{
 				min.x = Math.min(min.x, pos[0]);
 				min.y = Math.min(min.y, pos[1]);
 				min.z = Math.min(min.z, 20);
+
+                max.x = Math.max(max.x, pos[0]);
+                max.y = Math.max(max.y, pos[1]);
+                max.z = Math.max(max.z, pos[2]);
 				
 				coordinates.push(...pos, 20);
 				if(i > 0 && i < geometry.coordinates.length - 1){
@@ -95,11 +119,13 @@ export class ShapefileLoader{
 			line.scale.set( 1, 1, 1 );
 			line.position.copy(min);
 			
-			return line;
+			boundingBox.set(min, max);
+			node = line;
 		}else if(geometry.type === "LineStringZ"){
 				let coordinates = [];
 				
 				let min = new THREE.Vector3(Infinity, Infinity, Infinity);
+				let max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
 				for(let i = 0; i < geometry.coordinates.length; i++){
 					let [long, lat, height] = geometry.coordinates[i];
 					let pos = transform.forward([long, lat, height]);
@@ -107,6 +133,10 @@ export class ShapefileLoader{
 					min.x = Math.min(min.x, pos[0]);
 					min.y = Math.min(min.y, pos[1]);
 					min.z = Math.min(min.z, pos[2]);
+
+					max.x = Math.max(max.x, pos[0]);
+					max.y = Math.max(max.y, pos[1]);
+					max.z = Math.max(max.z, pos[2]);
 					
 					coordinates.push(...pos);
 					if(i > 0 && i < geometry.coordinates.length - 1){
@@ -126,12 +156,14 @@ export class ShapefileLoader{
 				line.computeLineDistances();
 				line.scale.set( 1, 1, 1 );
 				line.position.copy(min);
-				
-				return line;
+			
+				boundingBox.set(min, max);
+				node = line;
 		}else if(geometry.type === "MultiLineStringZ"){
 				let coordinates = [];
 				
 				let min = new THREE.Vector3(Infinity, Infinity, Infinity);
+				let max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
 				for(let pc of geometry.coordinates){
 					for(let i = 0; i < pc.length; i++){
 						let [long, lat, height] = pc[i];
@@ -140,6 +172,10 @@ export class ShapefileLoader{
 						min.x = Math.min(min.x, pos[0]);
 						min.y = Math.min(min.y, pos[1]);
 						min.z = Math.min(min.z, pos[2]);
+
+						max.x = Math.max(max.x, pos[0]);
+						max.y = Math.max(max.y, pos[1]);
+						max.z = Math.max(max.z, pos[2]);
 
 						coordinates.push(...pos);
 						if(i > 0 && i < pc.length - 1){
@@ -160,13 +196,15 @@ export class ShapefileLoader{
 				line.computeLineDistances();
 				line.scale.set( 1, 1, 1 );
 				line.position.copy(min);
-				
-				return line;
+
+				boundingBox.set(min, max);
+				node = line;
 		}else if(geometry.type === "Polygon"){
 			for(let pc of geometry.coordinates){
 				let coordinates = [];
 				
 				let min = new THREE.Vector3(Infinity, Infinity, Infinity);
+				let max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
 				for(let i = 0; i < pc.length; i++){
 					let [long, lat] = pc[i];
 					let pos = pc[i].length > 2?transform.forward([long, lat, pc[i][2]]):transform.forward([long, lat,20]);
@@ -174,6 +212,10 @@ export class ShapefileLoader{
 					min.x = Math.min(min.x, pos[0]);
 					min.y = Math.min(min.y, pos[1]);
 					min.z = Math.min(min.z, pos[2]);
+
+					max.x = Math.max(max.x, pos[0]);
+					max.y = Math.max(max.y, pos[1]);
+					max.z = Math.max(max.z, pos[2]);
 					
 					coordinates.push(...pos);
 					if(i > 0 && i < pc.length - 1){
@@ -189,20 +231,24 @@ export class ShapefileLoader{
 
 				const lineGeometry = new LineGeometry();
 				lineGeometry.setPositions( coordinates );
+				lineGeometry.computeBoundingBox();
+				lineGeometry.computeBoundingSphere();
 
 				const line = new Line2( lineGeometry, matLine );
 				line.computeLineDistances();
 				line.scale.set( 1, 1, 1 );
 				line.position.copy(min);
-				
-				return line;
+
+				boundingBox.set(min, max);
+				node = line;
 			}
 		}else if(geometry.type === "MultiPolygon"){
 			let coordinates = [];
 			let min = new THREE.Vector3(Infinity, Infinity, Infinity);
+			let max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
 			for(let pcExternal of geometry.coordinates){
 				for(let pc of pcExternal){
-					console.log("Parsing pc " + JSON.stringify(pc));
+					//console.log("Parsing pc " + JSON.stringify(pc));
 
 					for(let i = 0; i < pc.length; i++){
 						let [long, lat] = pc[i];
@@ -211,6 +257,10 @@ export class ShapefileLoader{
 						min.x = Math.min(min.x, pos[0]);
 						min.y = Math.min(min.y, pos[1]);
 						min.z = Math.min(min.z, pos[2]);
+
+						max.x = Math.max(max.x, pos[0]);
+						max.y = Math.max(max.y, pos[1]);
+						max.z = Math.max(max.z, pos[2]);
 					
 						coordinates.push(...pos);
 						if(i > 0 && i < pc.length - 1){
@@ -232,10 +282,14 @@ export class ShapefileLoader{
 			line.scale.set( 1, 1, 1 );
 			line.position.copy(min);
 
-			return line;
+			boundingBox.set(min, max);
+			node = line;
 		}else{
 			console.log("unhandled feature: ", feature);
 		}
+		node.boundingBox = boundingBox;
+
+    	return node;
 	}
 
 	async loadShapefileFeatures(file){
@@ -258,5 +312,48 @@ export class ShapefileLoader{
 		return features;
 	}
 
+	async loadShapefilePrjTransform(shpFileUrl) {
+      // Determine the URL for the .prj file based on the provided .shp file URL.
+      const prjFileUrl = shpFileUrl.replace(/\.shp$/, '.prj');
+  
+      try {
+        // Use fetch to retrieve the .prj file content from the URL.
+        const response = await fetch(prjFileUrl);
+  
+        if (!response.ok) {
+          throw new Error(`Failed to fetch .prj file. Status: ${response.status}`);
+        }
+  
+        // Read the .prj file content as text.
+        const prjData = await response.text();
+  
+        // Parse the projection information from the .prj file content.
+        //const projection = this.parsePrjContent(prjData);
+	    //console.log("projection: " + projection);
+	    const crs = proj4(prjData, '+proj=tmerc +lat_0=42.5 +lon_0=-72.5 +k=0.999964286 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +units=ft +no_defs');
+  
+        // Create a Proj4 transform to WGS84 using the parsed projection.
+        //const transformToWGS84 = proj4(projection).inverse;
+  
+        return crs;
+      } catch (error) {
+        // Handle any errors that occur during fetching or parsing.
+        console.error('Error loading .prj file:', error);
+        return null; // Return null to indicate failure or absence of projection.
+      }
+	}
+
+  	// Parse the projection information from the .prj file content.
+  	parsePrjContent(prjContent) {
+  	  // Use regex to extract the WKT projection information from the content.
+  	  const wktMatch = prjContent.match(/PROJCS\["(.*?)",/);
+
+  	  if (wktMatch && wktMatch[1]) {
+  	    return wktMatch[1]; // Return the extracted WKT projection information.
+  	  }
+
+  	  // If parsing fails, return null.
+  	  return null;
+  	}
 };
 
