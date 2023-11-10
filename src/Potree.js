@@ -77,6 +77,7 @@ export {VRControls} from "./navigation/VRControls.js";
 
 import "./extensions/OrthographicCamera.js";
 import "./extensions/PerspectiveCamera.js";
+import "./extensions/Vector3.js";
 import "./extensions/Ray.js";
 
 import {LRU} from "./LRU.js";

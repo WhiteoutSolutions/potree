@@ -229,6 +229,19 @@ export class EarthControls extends EventDispatcher {
 		}
 	}
 
+	resetTo2D() {
+		let ray = Utils.mouseToRay(mouse, camera, domElement.clientWidth, domElement.clientHeight);
+		let plane = new THREE.Plane().setFromNormalAndCoplanarPoint(
+					new THREE.Vector3(0, 0, 1),
+					this.pivot);
+
+		let distanceToPlane = ray.distanceToPlane(plane);
+
+		if (distanceToPlane > 0) {
+			
+		}
+	}
+
 	update (delta) {
 		let view = this.scene.view;
 		let fade = Math.pow(0.5, this.fadeFactor * delta);

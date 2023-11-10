@@ -22,15 +22,19 @@ THREE.PerspectiveCamera.prototype.zoomTo = function (node, factor) {
 		bs = node.boundingBox.getBoundingSphere(new THREE.Sphere());
 	}
 
-	let _factor = factor || 1;
-
 	bs = bs.clone().applyMatrix4(node.matrixWorld);
+	this.zoomToBS(bs, factor);
+};
+
+THREE.PerspectiveCamera.prototype.zoomToBS = function (bs, factor) {
 	let radius = bs.radius;
 	let fovr = this.fov * Math.PI / 180;
 
 	if (this.aspect < 1) {
 		fovr = fovr * this.aspect;
 	}
+
+	let _factor = factor || 1;
 
 	let distanceFactor = Math.abs(radius / Math.sin(fovr / 2)) * _factor;
 

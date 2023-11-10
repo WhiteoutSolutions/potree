@@ -55,6 +55,39 @@ export class View{
 		
 	}
 
+	get up() {
+		// Calculate the up vector based on pitch and yaw angles
+		let upVector = new THREE.Vector3(0, 0, 1); // Assuming Z-axis as the default up direction
+		upVector.applyAxisAngle(new THREE.Vector3(1, 0, 0), this.pitch);
+		upVector.applyAxisAngle(new THREE.Vector3(0, 0, 1), this.yaw);
+		return upVector;
+	}
+
+	set up(upVector) {
+		// Set the up vector while keeping the pitch and yaw angles consistent
+		let pitch = Math.asin(-upVector.z);
+		let yaw = Math.atan2(upVector.y, upVector.x) - Math.PI / 2;
+
+		this.pitch = pitch;
+		this.yaw = yaw;
+	}
+
+	setPitchAndYaw(direction, up) {
+		// Normalize the direction and up vectors
+		direction.normalize();
+		up.normalize();
+
+		// Calculate the yaw angle
+		let yaw = Math.atan2(direction.y, direction.x) - Math.PI / 2;
+
+		// Calculate the pitch angle
+		let rightVector = new THREE.Vector3();
+		rightVector.crossVectors(up, direction);
+		let pitch = Math.asin(-rightVector.z);
+
+		return { pitch, yaw };
+	}
+
 	lookAt(t){
 		let V;
 		if(arguments.length === 1){
@@ -130,11 +163,13 @@ export class View{
 		}else if(position.x != null){
 			endPosition = position.clone();
 		}
+			console.log("potreee target: " + target);
 
 		let endTarget = null;
 		if(target instanceof Array){
 			endTarget = new THREE.Vector3(...target);
 		}else if(target.x != null){
+			console.log("Endtarget is vector");
 			endTarget = target.clone();
 		}
 		
@@ -148,6 +183,7 @@ export class View{
 
 		if(duration === 0){
 			this.position.copy(endPosition);
+			console.log("Endtarget: " + endTarget.x);
 			this.lookAt(endTarget);
 		}else{
 			let value = {x: 0};
@@ -187,5 +223,26 @@ export class View{
 		}
 
 	}
+
+	setCameraAboveTarget() {
+    // Get the current target position (position + direction * radius)
+    const currentTarget = this.getPivot();
+
+    // Calculate the radius based on the current target position
+    const radius = this.radius;
+
+    // Calculate the pitch angle to look down at the target
+    const pitch = -Math.PI / 2; // Looking straight down
+
+    // Calculate the yaw angle to ensure the up direction is towards north
+    // Assuming "north" is along the positive y-axis
+    const yaw = 0;//Math.atan2(currentTarget.x, currentTarget.z);
+
+    // Set the camera's position, radius, pitch, and yaw
+    this.position.copy(currentTarget.add(new THREE.Vector3(0,0,radius)));
+    this.radius = radius;
+    this.pitch = pitch;
+    this.yaw = yaw;
+}
 
 };
