@@ -21,8 +21,8 @@
         "commands": [
                {
                    "match": "\\.js$",
-                   //"cmd": "npm run build && Xcopy /E /I /Y \"./build/potree\" \"/Users/ysevigny/Documents/Work/WhiteoutSolutions/Git/geosap/public/potree_libs/potree\""
-                   "cmd": "npm run build && cp -R \"./build/potree\" \"/Users/ysevigny/Documents/Work/WhiteoutSolutions/Git/geosap/geosap-client/public/potree_libs/\""
+                   "cmd": "npm run build && Xcopy /E /I /Y \"./build/potree\" \"D:/Work/WhiteoutSolutions/Git/canopy/geosap-client/public/potree_libs/potree\""
+                   //"cmd": "npm run build && cp -R \"./build/potree\" \"/Users/ysevigny/Documents/Work/WhiteoutSolutions/Git/geosap/geosap-client/public/potree_libs/\""
                }
         ]
     },
