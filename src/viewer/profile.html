@@ -1,7 +1,7 @@
 <div id="profile_window" style="
 	position: absolute; 
-	width: 84%;
-	left: 15%; top: 55%; height: 44%;
+	width: calc(100% - 10px);
+	left: 0%; bottom: 0%; height: 36%;
 	margin: 5px;
 	border: 1px solid black; 
 	display: none; box-sizing: border-box; z-index:10000">
@@ -42,11 +42,11 @@
 						margin: 2px;
 						"></span>
 					
-					<img id="potree_profile_rotate_cw" class="text-icon"/>
-					<img id="potree_profile_rotate_ccw" class="text-icon"/>
+					<img id="potree_profile_rotate_cw" class="text-icon" style="margin: 0px 4px"/>
+					<img id="potree_profile_rotate_ccw" class="text-icon" style="margin: 0px 4px"/>
 
-					<img id="potree_profile_move_forward" class="text-icon"/>
-					<img id="potree_profile_move_backward" class="text-icon"/>
+					<img id="potree_profile_move_forward" class="text-icon" style="margin: 0px 4px"/>
+					<img id="potree_profile_move_backward" class="text-icon" style="margin: 0px 4px"/>
 
 					<a id="potree_download_profile_ortho_link" href="#" download="profile.csv">
 						<img id="potree_download_csv_icon" class="text-icon"/>

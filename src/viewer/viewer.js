@@ -1348,16 +1348,16 @@ export class Viewer extends EventDispatcher{
 
 		let elProfile = $('<div>').load(new URL(Potree.scriptPath + '/profile.html').href, () => {
 			console.log("Loaded profile window ");
-			$(document.body).append(elProfile.children());
+			$(this.renderArea).append(elProfile.children());
 			this.profileWindow = new ProfileWindow(this);
 			this.profileWindowController = new ProfileWindowController(this);
 
 			$('#profile_window').draggable({
 				handle: $('#profile_titlebar'),
-				containment: $(document.body)
+				containment: $(this.renderArea)
 			});
 			$('#profile_window').resizable({
-				containment: $(document.body),
+				containment: $(this.renderArea),
 				handles: 'n, e, s, w'
 			});
 
@@ -1367,6 +1367,18 @@ export class Viewer extends EventDispatcher{
 					task();
 				}
 			});
+		});
+
+
+		i18n.init({
+			lng: 'en',
+			resGetPath: Potree.resourcePath + '/lang/__lng__/__ns__.json',
+			preload: ['en', 'fr', 'de', 'jp', 'se', 'es', 'zh'],
+			getAsync: true,
+			debug: false
+		}, function (t) {
+			// Start translation once everything is loaded
+			$('body').i18n();
 		});
 
 		let sidebarContainer = $('#potree_sidebar_container');
@@ -1427,16 +1439,6 @@ export class Viewer extends EventDispatcher{
 				});
 			});
 
-			i18n.init({
-				lng: 'en',
-				resGetPath: Potree.resourcePath + '/lang/__lng__/__ns__.json',
-				preload: ['en', 'fr', 'de', 'jp', 'se', 'es', 'zh'],
-				getAsync: true,
-				debug: false
-			}, function (t) {
-				// Start translation once everything is loaded
-				$('body').i18n();
-			});
 
 			$(() => {
 				//initSidebar(this);

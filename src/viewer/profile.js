@@ -250,16 +250,16 @@ export class ProfileWindow extends EventDispatcher {
 		this.autoFitEnabled = true; // completely disable/enable
 		this.autoFit = false; // internal
 
-		let cwIcon = `${exports.resourcePath}/icons/arrow_cw.svg`;
+		let cwIcon = `${exports.resourcePath}/icons/rotate_cw.svg`;
 		$('#potree_profile_rotate_cw').attr('src', cwIcon);
 
-		let ccwIcon = `${exports.resourcePath}/icons/arrow_ccw.svg`;
+		let ccwIcon = `${exports.resourcePath}/icons/rotate_ccw.svg`;
 		$('#potree_profile_rotate_ccw').attr('src', ccwIcon);
 		
-		let forwardIcon = `${exports.resourcePath}/icons/arrow_up.svg`;
+		let forwardIcon = `${exports.resourcePath}/icons/arrow_next.svg`;
 		$('#potree_profile_move_forward').attr('src', forwardIcon);
 
-		let backwardIcon = `${exports.resourcePath}/icons/arrow_down.svg`;
+		let backwardIcon = `${exports.resourcePath}/icons/arrow_previous.svg`;
 		$('#potree_profile_move_backward').attr('src', backwardIcon);
 
 		let csvIcon = `${exports.resourcePath}/icons/file_csv_2d.svg`;
