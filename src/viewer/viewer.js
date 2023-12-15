@@ -1353,8 +1353,8 @@ export class Viewer extends EventDispatcher{
 			this.profileWindowController = new ProfileWindowController(this);
 
 			$('#profile_window').draggable({
-				handle: $('#profile_titlebar'),
-				containment: $(this.renderArea)
+				handle: $('#profileInfo'),
+				containment: $(this.renderArea),
 			});
 			$('#profile_window').resizable({
 				containment: $(this.renderArea),
