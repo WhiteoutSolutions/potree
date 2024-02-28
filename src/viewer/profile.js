@@ -902,6 +902,7 @@ export class ProfileWindowController {
 	constructor (viewer) {
 		this.viewer = viewer;
 		this.profileWindow = viewer.profileWindow;
+		this.elWidthSlider = this.profileWindow.elRoot.find(`#sldProfileWidth`);
 		this.profile = null;
 		this.numPoints = 0;
 		this.threshold = 60 * 1000;
@@ -935,6 +936,38 @@ export class ProfileWindowController {
 
 		});
 
+		this.elWidthSlider = this.profileWindow.elRoot.find(`#sldProfileWidth`);
+		this.elWidthSlider.spinner({
+			min: 0, max: 10 * 1000 * 1000, step: 0.01,
+			numberFormat: 'n',
+			start: () => {},
+			spin: (event, ui) => {
+				let value = this.elWidthSlider.spinner('value');
+				this.profile.setWidth(value);
+			},
+			change: (event, ui) => {
+				let value = this.elWidthSlider.spinner('value');
+				this.profile.setWidth(value);
+			},
+			stop: (event, ui) => {
+				let value = this.elWidthSlider.spinner('value');
+				this.profile.setWidth(value);
+			},
+			incremental: (count) => {
+				let value = this.elWidthSlider.spinner('value');
+				let step = this.elWidthSlider.spinner('option', 'step');
+
+				let delta = value * 0.05;
+				let increments = Math.max(1, parseInt(delta / step));
+
+				return increments;
+			}
+		});
+		if(this.profile) {
+			this.elWidthSlider.spinner('value', this.profile.getWidth());
+		}
+		this.elWidthSlider.spinner('widget').css('width', '100%');
+
 		const rotate = (radians) => {
 			const profile = this.profile;
 			const points = profile.points;
@@ -957,7 +990,7 @@ export class ProfileWindowController {
 			}
 		}
 
-		$("#potree_profile_rotate_cw").click( () => {
+		/*$("#potree_profile_rotate_cw").click( () => {
 			const radians = THREE.Math.degToRad(this.rotateAmount);
 			rotate(-radians);
 		});
@@ -1001,15 +1034,23 @@ export class ProfileWindowController {
 			for(let i = 0; i < points.length; i++){
 				profile.setPosition(i, points[i].clone().add(move));
 			}
-		});
+		});*/
 	}
 
 	setProfile (profile) {
+		let widthListener = (event) => {
+			let value = this.elWidthSlider.spinner('value');
+			if (value !== this.profile.getWidth()) {
+				this.elWidthSlider.spinner('value', this.profile.getWidth());
+			}
+		};
+		//this.propertiesPanel.addVolatileListener(this.profile, "width_changed", widthListener);
 		if (this.profile !== null && this.profile !== profile) {
 			this.profile.removeEventListener('marker_moved', this._recompute);
 			this.profile.removeEventListener('marker_added', this._recompute);
 			this.profile.removeEventListener('marker_removed', this._recompute);
 			this.profile.removeEventListener('width_changed', this._recompute);
+			this.profile.removeEventListener('width_changed', widthListener);
 		}
 
 		this.profile = profile;
@@ -1019,6 +1060,7 @@ export class ProfileWindowController {
 			this.profile.addEventListener('marker_added', this._recompute);
 			this.profile.addEventListener('marker_removed', this._recompute);
 			this.profile.addEventListener('width_changed', this._recompute);
+			this.profile.addEventListener('width_changed', widthListener);
 		}
 
 		this.recompute();
