@@ -990,7 +990,7 @@ export class ProfileWindowController {
 			}
 		}
 
-		/*$("#potree_profile_rotate_cw").click( () => {
+		$("#potree_profile_rotate_cw").click( () => {
 			const radians = THREE.Math.degToRad(this.rotateAmount);
 			rotate(-radians);
 		});
@@ -1034,7 +1034,7 @@ export class ProfileWindowController {
 			for(let i = 0; i < points.length; i++){
 				profile.setPosition(i, points[i].clone().add(move));
 			}
-		});*/
+		});
 	}
 
 	setProfile (profile) {
