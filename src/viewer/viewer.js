@@ -915,6 +915,85 @@ export class Viewer extends EventDispatcher{
 		}
 	};
 
+	zoomToNew(node, factor, animationDuration = 0) {
+		let view = this.scene.view;
+	
+		let camera = this.scene.cameraP.clone();
+		camera.rotation.copy(this.scene.cameraP.rotation);
+		camera.rotation.order = "ZXY";
+		camera.rotation.x = Math.PI / 2 + view.pitch;
+		camera.rotation.z = view.yaw;
+		camera.updateMatrix();
+		camera.updateMatrixWorld();
+		camera.zoomTo(node, factor);
+	
+		let bs;
+		if (node.boundingSphere) {
+		  bs = node.boundingSphere;
+		} else if (node.geometry && node.geometry.boundingSphere) {
+		  bs = node.geometry.boundingSphere;
+		} else if (node.boundingBox) {
+		  bs = node.boundingBox.getBoundingSphere(new THREE.Sphere());
+		} else {
+		  var bbox = new THREE.Box3().setFromObject(node);
+		  bs = bbox.getBoundingSphere(new THREE.Sphere());
+		}
+		bs = bs.clone().applyMatrix4(node.matrixWorld);
+	
+		let startPosition = view.position.clone();
+		let endPosition = camera.position.clone();
+		let startTarget = view.getPivot();
+		let endTarget = bs.center;
+		let startRadius = view.radius;
+		let endRadius = endPosition.distanceTo(endTarget);
+	
+		let easing = TWEEN.Easing.Quartic.Out;
+	
+		// Create separate tweens for x, y, and z components of camera position
+		let tweenX = new TWEEN.Tween({ x: startPosition.x }).to({ x: endPosition.x }, animationDuration);
+		let tweenY = new TWEEN.Tween({ y: startPosition.y }).to({ y: endPosition.y }, animationDuration);
+		let tweenZ = new TWEEN.Tween({ z: startPosition.z }).to({ z: endPosition.z }, animationDuration);
+	
+		// Set easing functions for x and y components (move closer to target)
+		tweenX.easing(easing);
+		tweenY.easing(easing);
+	
+		// Update camera position components individually
+		tweenX.onUpdate((obj) => {
+		  view.position.x = obj.x;
+		});
+	
+		tweenY.onUpdate((obj) => {
+		  view.position.y = obj.y;
+		});
+	
+		// Start x and y tweens in parallel
+		tweenX.start();
+		tweenY.start();
+	
+		// Wait for x and y tweens to finish before starting the z tween
+		tweenY.onComplete(() => {
+		  // Set easing function for z component (zoom)
+		  tweenZ.easing(easing);
+	
+		  // Update camera z position
+		  tweenZ.onUpdate((obj) => {
+		    view.position.z = obj.z;
+		  });
+	
+		  // Start z tween after x and y are finished
+		  tweenZ.start();
+		});
+	
+		// Set up complete and started events for the final z tween
+		tweenZ.onComplete(() => {
+		  view.lookAt(endTarget);
+		  this.dispatchEvent({ type: "focusing_finished", target: this });
+		});
+	
+		this.dispatchEvent({ type: "focusing_started", target: this });
+	}
+
 	zoomToExtents(extents) {
 		var bbox = new THREE.Box3(new THREE.Vector3());
 		const bs = bbox.getBoundingSphere(new THREE.Sphere());
@@ -1439,6 +1518,8 @@ export class Viewer extends EventDispatcher{
 				});
 			});
 
+
+			console.log("Potree Res path: " + Potree.resourcePath);
 
 			$(() => {
 				//initSidebar(this);
