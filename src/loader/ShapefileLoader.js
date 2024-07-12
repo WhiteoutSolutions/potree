@@ -10,7 +10,7 @@ export class ShapefileLoader{
 		this.transform = null;
 	}
 
-	async load(path){
+	async load(path, projData, sceneProj){
 
 		const matLine = new LineMaterial( {
 			color: 0xff0000,
@@ -19,7 +19,8 @@ export class ShapefileLoader{
 			dashed: false
 		} );
 
-		this.transform = await this.loadShapefilePrjTransform(path);
+		//const projData = await this.loadShapefilePrjData(path); 
+		this.transform = this.getShapefilePrjTransform(projData, sceneProj); 
 
 		const features = await this.loadShapefileFeatures(path);
 		const node = new THREE.Object3D();
@@ -311,8 +312,8 @@ export class ShapefileLoader{
 
 		return features;
 	}
-
-	async loadShapefilePrjTransform(shpFileUrl) {
+	
+	async loadShapefilePrjData(shpFileUrl) {
       // Determine the URL for the .prj file based on the provided .shp file URL.
       const prjFileUrl = shpFileUrl.replace(/\.shp$/, '.prj');
   
@@ -330,7 +331,20 @@ export class ShapefileLoader{
         // Parse the projection information from the .prj file content.
         //const projection = this.parsePrjContent(prjData);
 	    //console.log("projection: " + projection);
-	    const crs = proj4(prjData, '+proj=tmerc +lat_0=42.5 +lon_0=-72.5 +k=0.999964286 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +units=ft +no_defs');
+  
+        return prjData;
+      } catch (error) {
+        // Handle any errors that occur during fetching or parsing.
+        console.error('Error loading .prj file:', error);
+        return null; // Return null to indicate failure or absence of projection.
+      }
+	}
+
+	getShapefilePrjTransform(prjData, sceneProj) {
+      try {
+		if(!sceneProj)
+			sceneProj = '+proj=tmerc +lat_0=42.5 +lon_0=-72.5 +k=0.999964286 +x_0=500000.00001016 +y_0=0 +ellps=GRS80 +units=ft +no_defs';
+	    const crs = proj4(prjData, sceneProj);
   
         // Create a Proj4 transform to WGS84 using the parsed projection.
         //const transformToWGS84 = proj4(projection).inverse;
@@ -338,7 +352,7 @@ export class ShapefileLoader{
         return crs;
       } catch (error) {
         // Handle any errors that occur during fetching or parsing.
-        console.error('Error loading .prj file:', error);
+        console.error('Error creating transform:', error);
         return null; // Return null to indicate failure or absence of projection.
       }
 	}
