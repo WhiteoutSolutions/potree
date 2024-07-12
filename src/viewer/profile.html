@@ -19,13 +19,18 @@
 	<div style="position: absolute; top: 30px; width: 100%; height: calc(100% - 30px); box-sizing: border-box;" class="pw_content">
 		
 		<span class="pv-main-color" style="height: 100%; width: 100%; padding: 5px; display:flex; flex-direction: column; box-sizing: border-box;">
-			<div style=" width: 100%; color: #9d9d9d; margin: 5px; display: flex; flex-direction: row; box-sizing: border-box;">
+			<div style=" width: 100%; color: #9d9d9d; margin: 5px; display: flex; flex-direction: row; box-sizing: border-box; align-items: center;">
 				<span data-i18n="profile.nb_points"></span>: &nbsp;
 				<span id="profile_num_points">-</span>
 				<!--<span id="profile_threshold" style="width: 300px">
 					Threshold: <span id="potree_profile_threshold_label">123</span> <div id="potree_profile_threshold_slider"></div>
 				</span>-->
 				<span style="flex-grow: 1;"></span>
+				
+				<span style="display:flex; padding-right: 20px;">
+					<span style="display:flex; align-items: center; padding-right: 10px">Width: </span>
+					<input id="sldProfileWidth" name="sldProfileWidth" value="5.06" style="flex-grow: 1; width: 80px; padding: 0;">
+				</span>
 				<span>
 				
 					<!-- <span contenteditable="true" style="display: inline-block; 
@@ -33,14 +38,14 @@
 						vertical-align: top; 
 						background: white; color:black"></span> -->
 
-					<input id="potree_profile_rotate_amount" 
+					<!--<input id="potree_profile_rotate_amount" 
 						type="text" maxlength="4" value="10" style="
 						display: inline-block; 
-						width: 2.5em; 
+						width: 2em; 
 						vertical-align: top; 
 						background: white;
 						margin: 2px;
-						"></span>
+						"></span>-->
 					
 					<img id="potree_profile_rotate_cw" class="text-icon" style="margin: 0px 4px"/>
 					<img id="potree_profile_rotate_ccw" class="text-icon" style="margin: 0px 4px"/>
