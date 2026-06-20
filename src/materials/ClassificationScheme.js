@@ -4,7 +4,7 @@ import * as THREE from "../../libs/three.js/build/three.module.js";
 export const ClassificationScheme = {
 
 	DEFAULT: {
-		0:       { visible: true, name: 'never classified'  , color: [0.5,  0.5,  0.5,  1.0] },
+		0:       { visible: false, name: 'never classified'  , color: [0.5,  0.5,  0.5,  1.0] },
 		1:       { visible: true, name: 'unclassified'      , color: [0.5,  0.5,  0.5,  1.0] },
 		2:       { visible: true, name: 'ground'            , color: [0.63, 0.32, 0.18, 1.0] },
 		3:       { visible: true, name: 'low vegetation'    , color: [0.0,  1.0,  0.0,  1.0] },
@@ -14,7 +14,13 @@ export const ClassificationScheme = {
 		7:       { visible: true, name: 'low point(noise)'  , color: [1.0,  0.0,  1.0,  1.0] },
 		8:       { visible: true, name: 'key-point'         , color: [1.0,  0.0,  0.0,  1.0] },
 		9:       { visible: true, name: 'water'             , color: [0.0,  0.0,  1.0,  1.0] },
+		11:      { visible: true, name: 'road'           , color: [1.0,  1.0,  0.0,  1.0] },
 		12:      { visible: true, name: 'overlap'           , color: [1.0,  1.0,  0.0,  1.0] },
+		17:      { visible: true, name: 'bridges'           , color: [0.97255,  0.906,  0.11,  1.0] },
+		40:      { visible: true, name: 'Bathy'             , color: [0.42,  0.3,  0.03,  1.0] },
+		41:      { visible: true, name: 'water surface'     , color: [0.42,  0.83,  1.0,  1.0] },
+		45:      { visible: true, name: 'water column'      , color: [0.0,  0.0,  1.0,  1.0] },
+		65:      { visible: true, name: 'water surface'     , color: [0.42,  0.83,  1.0,  1.0] },
 		DEFAULT: { visible: true, name: 'default'           , color: [0.3,  0.6,  0.6,  0.5] },
 	}
 };

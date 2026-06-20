@@ -1426,7 +1426,7 @@ export class Viewer extends EventDispatcher{
 		this.mapView.init();
 
 		let elProfile = $('<div>').load(new URL(Potree.scriptPath + '/profile.html').href, () => {
-			console.log("Loaded profile window ");
+			//console.log("Loaded profile window ");
 			$(this.renderArea).append(elProfile.children());
 			this.profileWindow = new ProfileWindow(this);
 			this.profileWindowController = new ProfileWindowController(this);
@@ -1619,7 +1619,7 @@ export class Viewer extends EventDispatcher{
 
 	initThree () {
 
-		console.log(`initializing three.js ${THREE.REVISION}`);
+		//console.log(`initializing three.js ${THREE.REVISION}`);
 
 		let width = this.renderArea.clientWidth;
 		let height = this.renderArea.clientHeight;
